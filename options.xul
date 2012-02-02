@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<!-- ***** BEGIN LICENSE BLOCK *****
+ * Version: MIT/X11 License
+ * 
+ * Copyright (c) 2011 Girish Sharma
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * Contributor:
+ *   Girish Sharma <scrapmachines@gmail.com> (Creator)
+ *
+ * ***** END LICENSE BLOCK ***** -->
+
+<box xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+  <setting pref="extensions.SearchSpyBot.autoAddSearchEngine"
+    title="Automatically Add Search Engines" type="bool">
+    Automatically add search engines on which users have already searched once.
+  </setting>
+
+  <setting title="Add a new Search Engine" type="control">  
+    <button id="SearchEngineAdder" label="Click me after filling the two details below."
+    oncommand='Services.prefs.getBranch("extensions.SearchSpyBot.").setBoolPref("addSearchNow", true)'/>
+  </setting>
+
+  <setting pref="extensions.SearchSpyBot.tempSearchURL"
+    title="Enter the URL here" type="string">
+    Enter the URL of the Search Engine here with {SearchTerms} instead of the search query.
+  </setting>
+
+  <setting pref="extensions.SearchSpyBot.tempSearchName"
+    title="Name of the Search Engine" type="bool">
+    If left empty, domain name would be used.
+  </setting>
+
+</box>
