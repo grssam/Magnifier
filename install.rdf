@@ -3,20 +3,20 @@
        xmlns:r="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
   <r:Description about="urn:mozilla:install-manifest">
     <creator>Girish Sharma</creator>
-    <id>SearchSpyBot@girishsharma</id>
-    <name>Search SpyBot</name>
+    <id>Magnifier@girishsharma</id>
+    <name>Magnifier</name>
     <version>0.1</version>
     <bootstrap>true</bootstrap>
     <type>2</type>
-    <homepageURL>https://addons.mozilla.org/en-US/firefox/addon/search-spybot/</homepageURL>
-    <description>Easiest way to search on various sites using Location Bar</description>
+    <homepageURL>https://addons.mozilla.org/en-US/firefox/addon/magnifier/</homepageURL>
+    <description>A quick restarless magnifier to debug styles and web pages.</description>
     <optionsType>2</optionsType>
 
     <targetApplication>
       <r:Description>
         <id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</id>
         <minVersion>4.0</minVersion>
-        <maxVersion>13.0a1</maxVersion>
+        <maxVersion>14.0a1</maxVersion>
       </r:Description>
     </targetApplication>
   </r:Description>

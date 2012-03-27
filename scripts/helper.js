@@ -190,6 +190,7 @@ function makeWindowHelpers(window) {
 
   // Call a function after waiting a little bit
   function async(callback, delay) {
+    delay = delay || 0;
     let timer = setTimeout(function() {
       stopTimer();
       callback();
@@ -201,11 +202,10 @@ function makeWindowHelpers(window) {
         return;
       clearTimeout(timer);
       timer = null;
-      unUnload();
     }
 
     // Make sure to stop the timer when unloading
-    let unUnload = unload(stopTimer, window);
+    unload(stopTimer, window);
 
     // Give the caller a way to cancel the timer
     return stopTimer;
@@ -315,4 +315,22 @@ function makeCapital(word, len) {
   }
   else
     return "";
+}
+
+// Checks if the current input is already a uri
+function isURI(input) {
+  if (input.match(/ /) == null) {
+    try {
+      // Quit early if the input is already a URI
+      return Services.io.newURI(input, null, null);
+    } catch(ex) {}
+
+    try {
+      // Quit early if the input is domain-like (e.g., site.com/page)
+      return Cc["@mozilla.org/network/effective-tld-service;1"].
+        getService(Ci.nsIEffectiveTLDService).
+        getBaseDomainFromHost(input);
+    } catch(ex) {}
+  }
+  return null;
 }
