@@ -94,9 +94,9 @@ Magnifier.prototype = {
     listen(this.chromeWin, this.tabbrowser.tabContainer, "TabSelect", this.onTabSelect, false);
   },
   destroy: function magnifier_destroy() {
-    //this.panel.hidePopup();
-    //this.panel.parentNode.removeChild(this.panel);
-    //this.panel = null;
+    this.panel.hidePopup();
+    this.panel.parentNode.removeChild(this.panel);
+    this.panel = null;
     this.button.parentNode.removeChild(this.button);
     this.button = null;
   },
