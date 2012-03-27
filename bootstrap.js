@@ -30,8 +30,8 @@
 let global = this;
 
 const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
-const ICON_OPEN = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAC9ElEQVR42p2SW0iTYRjH19TuhhdeRbchQmQXmuDZodtMN1djw0Qr3PIiMq0sdaOaghch6qahlrGQzBBPTSnFPM+lpm6mqFPxbM6ppeYB3eHbv+8z8CJXWX94eD943ufH7/3el0b7QwQCwamkpKSM4uJnoxWVNaY3FVXGkhcqXUpKSqZIJDpNO2ZcYmNjFdk5CogTpZCkPcXNxyrE3crEw8wnSJdKlzgczpm/QZx4PF7Xpejr9gyVFprJDTQbNtEwvAnt9DYqNHOQyJ4jMTFxLyQk5Pew8HCWiBslQG6lHmrdOt4ObuPdyB7ej+2jfngX6sHvqOw2Ij6tCFwub8nf35/h0IbJZM4kyF+j/KPpYLBpwoyWaRtapwm0TFnRaNhHrW4T+XXjCOcJQVoJj1B8fX3PhXG4yKkeRa1+E82TZrTPEOicAzrngY45O9pIaKNhD680Jggk6RSo5AiI1IxgRQhQ8mEWDaM76JixoWvBDu0CDkszT6B1yoyagXWIpUUICgpSOzIKDg3n42XLPJoMO+ias6Fn0Y7eLzis7gXScMaMusENXLuXR4Gqj4A8PDzcAoNCbIqaETSPb6FnwYJ+I4GBZTt0JhysfUuk5ewe6vVrYEXFUqB0h7dGNsrCLkvQMvIN/Yv70C9bMbRCYHiVwOcVG3RGCz7N76K4bgjMUDYCAgLOO+KcKCgoiIyK4uNBdjn6ZrdgWLPA8NX6s9asGFs1o0o7jQt+oXbyhpUObUh6rlarNbe1dyAu7iouihKg7l3ExLoVk+ukzeIuZMoqsDiRYLPZWi8vLxdHkML8/Hwb+cMRL5ZY5HI5VygUlsWLbxD3pZm4k/oIt++m4kpMzCyfz48mR+i/MpwDAwPzlEol4efnB1dXV4JOpyuoY1JNHx8fN7IfTA5HUO+M2u/o3ZxlsVhZKpXK7u3tfQBxcnIqpP1rkpOTB0tLS+Hu7k5B7M7Ozkra/0Qmk3E8PT0pCMjjZDnUPmboDAYjgITIye+T/wv5ARO/1YZFgyOzAAAAAElFTkSuQmCC";
-const ICON_CLOSE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAACnklEQVR42p2T3UuacRTHndrutIuuhrejm7F2UQSVaRJlNCsIbYHd2F0UqWTihZCDoJucdRGBEARBL7BiV9FVUTOoxFapvWlqL5r1D4yN8rtzfheDrWdb68Dh98jznM/v+z3nKJP9Jdrb21/09/f7Jicn4wsLC/m5ublcMBiMDAwMvLdYLBrZI6PIarUGRkdH0dvbi8HBQXi9XvT09MDn88Hj8WSNRuPLf0EUJpPpc0dHR4EU4PDwENFoFLu7uzg5OcHa2hqD0NfX97Wuru7PsKamJktraytmZ2exvb2NcDiMvb097O/vIxKJiN8bGxtwuVygC7M1NTUqSTUGgyHFNtbX10VhLBbD8fGxyKOjIxwcHIgLFhcXGQRSZX5Aqaqqek3eMT8/j52dHcTjcZyeniKRSCCZTIqTgQxbXV2FzWaDXq8PPgCRzGYKLC8vCzsMOTs7+yUZyMq2trbgdrtRW1v7SUqRnnqElZUV0WAuSqfTyGQyPzOVSokLuFcOh4NBHx+ANBpNiU6nu6O9Eb3hoouLC1xeXuLq6kqc5+fnwiJbb2lpAX3vkZwavZhpa2sTU2I1XJzNZpHL5cTJYLa4tLSE+vp6aLXaN1KcZ4FA4C2Pf2RkRFjL5/O4ubkRyc/X19diotSGAk1sTFIN0f2hUOgbL11XVxfMZjM2Nzdxe3srkhX6/X7wZBsbG0Pl5eVFUpCJ8fHxO7oJ3d3d32mXTASaoed73mT+mzidTnR2dqZpf95Rifx3hpLG/oEs3VdXV0OtVt/L5fIA2+SXlZWVJTQZPfWtmfeMv5fam1cNDQ3DU1NThYqKCgFRKBQTsv8Nu93+ZXp6GqWlpQwpKJXKMdlTgjbTWFZWhuLiYpCdYUnZjwy5SqXS0jlE+fypkB/TCtArFwC79QAAAABJRU5ErkJggg%3D%3D";
+const ICON_OPEN = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAACYUlEQVR42mNgwATMwcHBelV1jYu6J0x/OmHmkjcdfdOvV9Y2z8wpKHDw8fHhwqKHgdHKyko5NDKhq6Vv7ufGSUv/N87Y+r9p2ob/jf0LfhbXtO2ISchwAAIWFF2WlpZCXn4h9RkVXS+nbrzyd/uVj/+3X/3yf+vlT/+XHXr4v2n6xr+xqQU7nJw8lVFss7S0swpPLt3XteTIr3Vn3//ffu37/123fv3fcePH/y2Xv/yfu+fe/+Titp9O7p4ZcF0qKirsdo4uUWnlvXfm7rr9b8e1b//33/vz/8D9v2B6z+2f/9efe/+/uGvpfxd3n6XIzuS0c3RLyq2f+mAp0Fn7gAqPPPz7/+ijf2D60P3fQGd//l8zeeN/Zw+frSihaWJu5Z9e1nNj6cG7/w7d/fH/5JO//089/Qemjz38/X/39Y//8+on/3d08uhDCRxbW1stF++QtT3zN38/dPP9/3PPfv6/+PLX//PPf/4/+ejr/9VH7vyNzyr9bG/v7AjXpKenx11VVeVYU1O7Pq+y9d20FTu/H7nx8t/5xx//n7r39t+6Q5d+5VW1v3J29+5RV1fnBWvS0tLiiYqK8k9LS9tZVlb+Oj8/f4NfSNzarulLby5ct/PhtMXr7xTWtO/39g9tBIaFCigGGJycnKQjIyN94+Lidjs6Or7W1NTaDZR09vX11Y6IiA5MSs9Kjk/NiA6NjLRxdnYWBmsCgYKCgu7s7Oz9dnZ2b6WlpXezsbEFAIV5YAEGCm2gi9jgGmAA6MRpQE2fRUVF97Ozs/sBhXgZiAHAiFcWEBBIBDI9gJiNgUgAAHoZLRyzGpV/AAAAAElFTkSuQmCC";
+const ICON_CLOSE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAACMUlEQVR42o2RT2iSYRzHDWNSbSClJ4960cCLqChNp6GGaCtFUEMwExEUVFCUqUQnoVQEtdFhMAJvSl0SQ9SzXvyHmmyKf/BQqy47jA306fe8MEnqsB+8PC8vfN7f9/l8SaR/h6zX67mRSORjMplcHB4e/kwkEoNoNPrB7Xbv8Xi8u/9hSLfEYjHTZDK9jcfj56lUCmWzWZROpxHAlwcHByWr1boHc3uDEolE9zUazetAIPC9UCgsW60WarfbqNlsolqthjKZzNJut5fkcjlzYxuAYpvNVj0+Pr6q1+uo0+mgXq+Hut0uAZdKJeTz+S4VCoVzTbFYLIpEIjH7/f7TYrG4wtBwOEQnJyfE2e/3UaPRQLFYDAGY+zvmHQBtIGVSrVbRYDBAo9EIjcdj4sQ/wLHxvZVK5ZcNm0KhcB82fqtUKiu8ZTKZoOl0SpwYxpHBLpLJZMkNObu7uxy1Wl04Ojq6wNFmsxlaLBZoPp8Tm0HQ0ul0nkulUtka4nK590C3DKJ+CoVCv3O53AWIWeFtEHMF0FUwGPwB94vTaLQdAuJwONtms3nf4XB8hSrOPB7PZ51OV4AOh/l8fgqWT8PhcE2r1b4BFyzcAJbCgMK1FoulDMWesdnsMp/Pf6xSqR4ajcbn0NsrqOiFwWB4JBAIHhAQHq/X+87lctXA6C8Gg1Emk8nP4PP2tTBsGxJtrYHrgYjvATqn0+k1CoXyFD7tkG4yUDyTSqW+hNcn8GyRbjh/APE8KJeiYd95AAAAAElFTkSuQmCC";
 Cu.import("resource://gre/modules/AddonManager.jsm");
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
@@ -94,9 +94,11 @@ Magnifier.prototype = {
     listen(this.chromeWin, this.tabbrowser.tabContainer, "TabSelect", this.onTabSelect, false);
   },
   destroy: function magnifier_destroy() {
-    this.panel.hidePopup();
-    this.panel.parentNode.removeChild(this.panel);
+    //this.panel.hidePopup();
+    //this.panel.parentNode.removeChild(this.panel);
+    //this.panel = null;
     this.button.parentNode.removeChild(this.button);
+    this.button = null;
   },
   setupZoom: function magnifier_setupZoom() {
     this.canvas.width = this.zoomWindow.width;
@@ -135,7 +137,7 @@ Magnifier.prototype = {
     this.resetButton = this.chromeDoc.createElementNS(XHTML, "div");
     this.resetButton.innerHTML = "Reset";
     this.resetButton.setAttribute("style", "text-decoration: none; margin: 2px; padding: 1px; cursor: pointer");
-    this.resetButton.addEventListener("click", this.startRenderingLoop, true);
+    listen(this.chromeWin, this.resetButton, "click", this.startRenderingLoop, true);
 
     hbox.appendChild(this.colorbox);
     hbox.appendChild(this.colortext);
@@ -155,12 +157,12 @@ Magnifier.prototype = {
     this.panel.setAttribute("style", "border-radius: 4px; -moz-appearance: none; padding: 10px;");
 
     this.panel.setAttribute("type", "arrow");
-    this.panel.addEventListener("popupshown", this.onPopupShown, true);
-    this.panel.addEventListener("popuphiding", this.onPopupHiding, true);
-    this.panel.addEventListener("keydown", this.onKeyPressed, true);
-    this.panel.addEventListener("keydown", this.onGridKeyPressed, true);
-    this.panel.addEventListener("mouseover", this.onPanelMouseOver, true);
-    this.panel.addEventListener("mouseout", this.onPanelMouseOut, true);
+    listen(this.chromeWin, this.panel, "popupshown", this.onPopupShown, true);
+    listen(this.chromeWin, this.panel, "popuphiding", this.onPopupHiding, true);
+    listen(this.chromeWin, this.panel, "keydown", this.onKeyPressed, true);
+    listen(this.chromeWin, this.panel, "keydown", this.onGridKeyPressed, true);
+    listen(this.chromeWin, this.panel, "mouseover", this.onPanelMouseOver, true);
+    listen(this.chromeWin, this.panel, "mouseout", this.onPanelMouseOut, true);
     this.chromeDoc.querySelector("#mainPopupSet").appendChild(this.panel);
 
     let box = this.chromeDoc.createElement("box");
@@ -340,8 +342,10 @@ Magnifier.prototype = {
 function magnifier (window) {
   function onUnload(aWindow) {
     try{
-      if (aWindow.magnifier)
+      if (aWindow.magnifier) {
         aWindow.magnifier.destroy();
+        aWindow.magnifier = null;
+      }
     } catch(e) {}
   }
   onUnload(window);
@@ -368,7 +372,6 @@ function startup(data, reason) AddonManager.getAddonByID(data.id, function(addon
 
   reload = function() {
     unload();
-
     watchWindows(magnifier);
   };
 });
