@@ -53,9 +53,16 @@ function pref(key, val) {
 }
 
 // Set custom values for this add-on
-pref.root = "extensions.maginifier.";
+pref.root = "extensions.magnifier.";
 pref.defaults = {
-  version: 0.1
+  version: 0.2,
+  buttonNextSiblingID: "",
+  buttonParentID: "addon-bar",
+  zoomChrome: false,
+  docked: false,
+  JSONrect: '{"top":0,"left":0,"width":0,"height":0}',
+  zoomLevel: 8,
+  state: 0      // 0: normal dragable panel, 1: panel will move with mouse.
 };
 
 pref.observe = function(prefs, callback) {
