@@ -32,7 +32,8 @@ let global = this;
 const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 const ICON_OPEN = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAACYUlEQVR42mNgwATMwcHBelV1jYu6J0x/OmHmkjcdfdOvV9Y2z8wpKHDw8fHhwqKHgdHKyko5NDKhq6Vv7ufGSUv/N87Y+r9p2ob/jf0LfhbXtO2ISchwAAIWFF2WlpZCXn4h9RkVXS+nbrzyd/uVj/+3X/3yf+vlT/+XHXr4v2n6xr+xqQU7nJw8lVFss7S0swpPLt3XteTIr3Vn3//ffu37/123fv3fcePH/y2Xv/yfu+fe/+Titp9O7p4ZcF0qKirsdo4uUWnlvXfm7rr9b8e1b//33/vz/8D9v2B6z+2f/9efe/+/uGvpfxd3n6XIzuS0c3RLyq2f+mAp0Fn7gAqPPPz7/+ijf2D60P3fQGd//l8zeeN/Zw+frSihaWJu5Z9e1nNj6cG7/w7d/fH/5JO//089/Qemjz38/X/39Y//8+on/3d08uhDCRxbW1stF++QtT3zN38/dPP9/3PPfv6/+PLX//PPf/4/+ejr/9VH7vyNzyr9bG/v7AjXpKenx11VVeVYU1O7Pq+y9d20FTu/H7nx8t/5xx//n7r39t+6Q5d+5VW1v3J29+5RV1fnBWvS0tLiiYqK8k9LS9tZVlb+Oj8/f4NfSNzarulLby5ct/PhtMXr7xTWtO/39g9tBIaFCigGGJycnKQjIyN94+Lidjs6Or7W1NTaDZR09vX11Y6IiA5MSs9Kjk/NiA6NjLRxdnYWBmsCgYKCgu7s7Oz9dnZ2b6WlpXezsbEFAIV5YAEGCm2gi9jgGmAA6MRpQE2fRUVF97Ozs/sBhXgZiAHAiFcWEBBIBDI9gJiNgUgAAHoZLRyzGpV/AAAAAElFTkSuQmCC";
 const ICON_CLOSE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAACMUlEQVR42o2RT2iSYRzHDWNSbSClJ4960cCLqChNp6GGaCtFUEMwExEUVFCUqUQnoVQEtdFhMAJvSl0SQ9SzXvyHmmyKf/BQqy47jA306fe8MEnqsB+8PC8vfN7f9/l8SaR/h6zX67mRSORjMplcHB4e/kwkEoNoNPrB7Xbv8Xi8u/9hSLfEYjHTZDK9jcfj56lUCmWzWZROpxHAlwcHByWr1boHc3uDEolE9zUazetAIPC9UCgsW60WarfbqNlsolqthjKZzNJut5fkcjlzYxuAYpvNVj0+Pr6q1+uo0+mgXq+Hut0uAZdKJeTz+S4VCoVzTbFYLIpEIjH7/f7TYrG4wtBwOEQnJyfE2e/3UaPRQLFYDAGY+zvmHQBtIGVSrVbRYDBAo9EIjcdj4sQ/wLHxvZVK5ZcNm0KhcB82fqtUKiu8ZTKZoOl0SpwYxpHBLpLJZMkNObu7uxy1Wl04Ojq6wNFmsxlaLBZoPp8Tm0HQ0ul0nkulUtka4nK590C3DKJ+CoVCv3O53AWIWeFtEHMF0FUwGPwB94vTaLQdAuJwONtms3nf4XB8hSrOPB7PZ51OV4AOh/l8fgqWT8PhcE2r1b4BFyzcAJbCgMK1FoulDMWesdnsMp/Pf6xSqR4ajcbn0NsrqOiFwWB4JBAIHhAQHq/X+87lctXA6C8Gg1Emk8nP4PP2tTBsGxJtrYHrgYjvATqn0+k1CoXyFD7tkG4yUDyTSqW+hNcn8GyRbjh/APE8KJeiYd95AAAAAElFTkSuQmCC";
-const ICON_OPTIONS = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAACN0lEQVR42mNgwAXq65mmnHwi3L//vAADOWDGofv+s488Oj3n8IMjPftvihDUUF+/im3GkXulUw7fCZx25L7FrEP3t8w88uA0CM84eK9lwu67cjMP3vMDyWE1YOr+W61AhadnHLiLF08/ePfolL23jTANOHC3EIhPT4HhvXd2TNl/q3fK/juzp+6/dwImDlIzad9NfQwDJu64HTZ5z+3TIDxpz+1ih/r9LDC5zg031CfvvbUNJDdh7+0joatWMcM1Juzfz9G3+3pU387ru/p33zjdv+P6fJB427bbot07ruf0bbvsBuJ37LxuBZYH4t6dV0vL5t7ghZi+44pj9/Zrp7u2XQXjzq2XY8Eatl6ZDRIH4aZN502BQoxd264dgKnr2XF9EdiApi0Xbdu3Xj7dBsUdmy/HgV2w5eoSkDgIN2+8ZAcyoG3LpUMwda2bLi6He6Npwxnz5k0XNrdsvHC6ecOFeeBoXXFSrWndxdbmTReTQfzadZcsQfJgvOF8f/O6s5oogViz6nRy/dpzp0G4bu05lEAsW3xaHSi2DSy3+uwuoPFMGLFQseLE1PIVp06XL4fgsuUnd5SvONFbtuLk7IqVJ0/AxIFqjqfN3M2PYUDuosMTCxYdOZ23AD/OX3T0aNbi/SoYBnjmTmJPm7ErMX3SPv3kSTvMUmfuP5I+68BpCN5bkjJ7n3HG7H3FydP3WROVmeKm7CxNnLb7dPzUXRsYHOpZSM6NWqH1bHFT9gi7dS/ixqcOAIKNhvsWmZLDAAAAAElFTkSuQmCC";
+const ICON_RIGHT_ARROW = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAQCAYAAADAvYV+AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAALBJREFUeNqUkCsOAjEQhltRhwLNFZAIPAdBYzgSAoPiGFwAC0cgoQn03WGm2d0syfbBn3wjmi/t/GUAsERuyAxhJVgnU17IqlWmeGTXKvc5/iPDVA8a8xgjZEg92DgFmUg9yOM0QgjA6jkl2XvfIp9ZLxfAh8N+WMM5l7v5jWyFENdBttZOyXeU1pzz588pyWPwpUt2c2MMdESt9aFYEwVAPphN9U+UUg8p5aLmfQUYAGDUZxKAAai7AAAAAElFTkSuQmCC";
+const ICON_LEFT_ARROW = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAQCAYAAADAvYV+AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAMxJREFUeNqUkbEOgjAQhnukZZE44Mykmwm7Pokru4OPZOILuPsCxsHJ2c3VRIYCQXr+NcFEBIp/8uWul//umlYws3AQgAuIPNGvGNzA3B76zAk4g/Gn0rF6y7+KZGNaAI712k6hMzbGPAC3AYW1MUHh2WW0vI1VVe0Au7BeialKDJQnpVwR0Rq5cZmpTsqyXCAcwKjNqJQiarxIiKYT0mnT7Ps+ff0grnNHcYa4F/8oz/NNURQGsMXZoLVeokkDHrQhTdNJlmVXm78EGACX3OmuRm5+1QAAAABJRU5ErkJggg==";
 Cu.import("resource://gre/modules/AddonManager.jsm");
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
@@ -73,6 +74,7 @@ function Magnifier(aWindow) {
   this.onGridKeyPressed = this.onGridKeyPressed.bind(this);
   this.startRenderingLoop = this.startRenderingLoop.bind(this);
   this.onZoomChromeChange = this.onZoomChromeChange.bind(this);
+  this.toggleOptionPane = this.toggleOptionPane.bind(this);
   this.panelStateChange = this.panelStateChange.bind(this);
   this.onMouseScrolled = this.onMouseScrolled.bind(this);
   this.onZoomClick = this.onZoomClick.bind(this);
@@ -81,6 +83,7 @@ function Magnifier(aWindow) {
   this.resizeDragEnd = this.resizeDragEnd.bind(this);
   this.saveToolbarButtonInfo= this.saveToolbarButtonInfo.bind(this);
   this.isOpen = false;
+  this.optionsVisible = false;
 
   this._init();
 }
@@ -116,7 +119,7 @@ Magnifier.prototype = {
 
     this.buildButton();
     this.buildPanel();
-    this.buildEyeDropper();
+    this.buildOptionsPanel();
 
     listen(this.chromeWin, this.tabbrowser.tabContainer, "TabSelect", this.onTabSelect, false);
   },
@@ -135,7 +138,7 @@ Magnifier.prototype = {
     this.stopRenderingLoop();
     this.deattachPageEvents();
     this.zoomChrome = !this.zoomChrome;
-    this.optionsMenu.lastChild.disabled = !this.zoomChrome;
+    this.moveWithMouseOption.disabled = !this.zoomChrome;
     this.attachPageEvents();
     this.startRenderingLoop();
   },
@@ -157,9 +160,9 @@ Magnifier.prototype = {
     this.canvas.style.height = this.grid.style.height = cssheight;
 
     this.grid.style.backgroundSize = this.zoomWindow.zoom + "px " + this.zoomWindow.zoom + "px";
-    
+
     this.crosshair.style.height = this.crosshair.style.width = (this.zoomWindow.zoom - 1) + "px";
-    this.moveCrosshair(this.zoomWindow.width / 2, this.zoomWindow.height / 2);
+    this.moveCrosshair(Math.floor(this.zoomWindow.width / 2), Math.floor(this.zoomWindow.height / 2));
   },
   moveCrosshair: function magnifier_moveCrosshair(x, y) {
     this.zoomWindow.cx = ~~x;
@@ -168,71 +171,68 @@ Magnifier.prototype = {
     this.crosshair.style.top = (this.zoomWindow.zoom * this.zoomWindow.cy) + "px";
   },
   /* ---------- UI builders ---------- */
-  buildEyeDropper: function magnifier_eyeDropper() {
-    let hbox = this.chromeDoc.createElement("hbox");
-    this.colorbox = this.chromeDoc.createElement("box");
-    this.colorbox.setAttribute("style", "width: 32px; border: 1px solid #333");
-
-    this.colortext = this.chromeDoc.createElement("textbox");
-    this.colortext.setAttribute("style", "border: 1px solid #333; -moz-box-flex: 1");
-    this.colortext.className = "devtools-searchinput";
-
-    let XHTML = "http://www.w3.org/1999/xhtml";
-    this.resetButton = this.chromeDoc.createElementNS(XHTML, "div");
-    this.resetButton.innerHTML = "Restart Drawing";
-    this.resetButton.setAttribute("style", "text-decoration: none; margin: 2px; padding: 1px; cursor: pointer");
-    if (this.isRendering)
-      this.resetButton.innerHTML = "Lock Zoom";
-    listen(this.chromeWin, this.resetButton, "click", this.startRenderingLoop, true);
-
-    this.optionsButton = this.chromeDoc.createElement("toolbarbutton");
-    this.optionsButton.setAttribute("type", "menu");
-    this.optionsButton.setAttribute("style", "list-style-image: url(" + ICON_OPTIONS +")");
-    this.optionsButton.className = "chromeclass-toolbar-additional";
-    this.optionsMenu = this.chromeDoc.createElement("menupopup");
-    this.optionsMenu.setAttribute("class", "popup-internal-box");
-    let (item = this.chromeDoc.createElement("menuitem")) {
-      item.setAttribute("label", "Zoom the whole Browser");
-      item.setAttribute("type", "checkbox");
-      item.setAttribute("checked", this.zoomChrome);
-      listen(this.chromeWin, item, "command", this.onZoomChromeChange);
-      this.optionsMenu.appendChild(item);
+  buildOptionsPanel: function magnifier_buildOptionsPanel() {
+    let (secondPane = this.chromeDoc.createElement("vbox")) {
+      secondPane.setAttribute("orient", "vertical");
+      secondPane.setAttribute("style", "border: solid #aaa;" +
+                                       "border-width: 0px 0px 0px 1px; padding: 10px 4px;" +
+                                       "-moz-transition-property: opacity, margin;" +
+                                       "-moz-transition-duration: 400ms, 300ms;");
+      if (this.optionsVisible) {
+        secondPane.style.opacity = 1;
+        secondPane.style.margin = "0px 2px";
+      }
+      else {
+        secondPane.style.opacity = 0;
+        secondPane.style.margin = "0px -175px 0px 0px";
+      }
+      let (zoomSlider = this.chromeDoc.createElement("hbox")) {
+        zoomSlider.setAttribute("flex", "1");
+        let (spacer = this.chromeDoc.createElement("spacer")) {
+          spacer.setAttribute("flex", "1");
+          zoomSlider.appendChild(spacer);
+        }
+        let label2 = this.chromeDoc.createElement("label");
+        label2.setAttribute("value", "2x");
+        label2.setAttribute("style", "padding: 4px 2px;color:#eee");
+        zoomSlider.appendChild(label2);
+        let zoomScope = this.chromeDoc.createElement("box");
+        zoomScope.setAttribute("style", "min-width: 100px; max-width: 100px; min-height: 24px;" +
+          "background-repeat: no-repeat; border: 1px solid black;" +
+          "margin: 2px 1px; max-height: 24px");
+        zoomScope.style.backgroundImage = "-moz-linear-gradient(right, #eee 1px, rgba(0,0,0,0) 1px)";
+        zoomScope.style.backgroundSize = ((this.zoomLevel - 2)*(100/14)) + "% 100%";
+        zoomSlider.appendChild(zoomScope);
+        this.zoomScope = zoomScope;
+        listen(this.chromeWin, this.zoomScope, "click", this.onZoomClick);
+        let label16 = this.chromeDoc.createElement("label");
+        label16.setAttribute("value", "16x");
+        label16.setAttribute("style", "padding: 4px 2px;color:#eee");
+        zoomSlider.appendChild(label16);
+        this.secondPane = secondPane;
+        secondPane.appendChild(zoomSlider);
+      }
+       let (optionsBox = this.chromeDoc.createElement("box")) {
+        optionsBox.setAttribute("orient", "vertical");
+        let zoomChromeOption = this.chromeDoc.createElement("checkbox");
+        zoomChromeOption.setAttribute("label", "Zoom the whole Browser");
+        zoomChromeOption.setAttribute("style", "color:#eee");
+        zoomChromeOption.setAttribute("checked", this.zoomChrome);
+        this.zoomChromeOption = zoomChromeOption;
+        listen(this.chromeWin, zoomChromeOption, "command", this.onZoomChromeChange);
+        optionsBox.appendChild(zoomChromeOption);
+        let moveWithMouseOption = this.chromeDoc.createElement("checkbox");
+        moveWithMouseOption.setAttribute("label", "Move with mouse");
+        moveWithMouseOption.setAttribute("checked", (this.state == 1));
+        moveWithMouseOption.setAttribute("style", "color:#eee");
+        moveWithMouseOption.setAttribute("disabled", !this.zoomChrome);
+        this.moveWithMouseOption = moveWithMouseOption;
+        listen(this.chromeWin, moveWithMouseOption, "command", this.panelStateChange);
+        optionsBox.appendChild(moveWithMouseOption);
+        secondPane.appendChild(optionsBox);
+      } 
+      this.panel.appendChild(secondPane);
     }
-    let (item = this.chromeDoc.createElement("menuitem")) {
-      item.setAttribute("label", "Move with mouse");
-      item.setAttribute("type", "checkbox");
-      item.setAttribute("checked", (this.state == 1));
-      item.setAttribute("disabled", !this.zoomChrome);
-      listen(this.chromeWin, item, "command", this.panelStateChange);
-      this.optionsMenu.appendChild(item);
-    }
-    this.optionsButton.appendChild(this.optionsMenu);
-
-    hbox.appendChild(this.colorbox);
-    hbox.appendChild(this.colortext);
-    hbox.appendChild(this.resetButton);
-    hbox.appendChild(this.optionsButton);
-    this.panel.appendChild(hbox);
-    let (spacer = this.chromeDoc.createElement("spacer")) {
-      spacer.setAttribute("flex", "1");
-      this.panel.appendChild(spacer);
-    }
-    let sizeBox = this.chromeDoc.createElement("hbox");
-    sizeBox.setAttribute("style", "height: 3px;");
-    let (spacer = this.chromeDoc.createElement("spacer")) {
-      spacer.setAttribute("flex", "1");
-      sizeBox.appendChild(spacer);
-    }
-    let resizer = this.chromeDoc.createElement("box");
-    resizer.setAttribute("draggable", "true");
-    resizer.setAttribute("style", "min-height:10px;max-height:10px;min-width:10px;" +
-      "max-width:10px;cursor: se-resize;-moz-appearance:resizer;box-shadow:0px 0px 4px 4px rgba(50,200,225,0.5)");
-    listen(this.chromeWin, resizer, "mousedown", this.resizeDragStart);
-    listen(this.chromeWin, this.chromeWin, "mousemove", this.resizeDrag);
-    listen(this.chromeWin, this.chromeWin, "mouseup", this.resizeDragEnd);
-    this.resizer = resizer;
-    sizeBox.appendChild(resizer);
-    this.panel.appendChild(sizeBox);
   },
   buildPanel: function magnifier_buildPanel() {
     this.panel = this.chromeDoc.createElement("panel");
@@ -241,10 +241,10 @@ Magnifier.prototype = {
     this.panel.setAttribute("noautohide", true);
     this.panel.setAttribute("backdrag", true);
     this.panel.setAttribute("level", "floating");
-    this.panel.setAttribute("orient", "vertical");
+    this.panel.setAttribute("orient", "horizontal");
 
-    this.panel.setAttribute("style", "border-radius: 10px;" +
-                                     "-moz-appearance: tooltip; padding: 10px;");
+    this.panel.setAttribute("style", "border-radius: 4px; border:1px solid #111;");
+    this.panel.style.backgroundImage = "-moz-linear-gradient(top, #7d7e7d 0%, #0e0e0e 100%)";
 
     listen(this.chromeWin, this.panel, "popupshown", this.onPopupShown, true);
     listen(this.chromeWin, this.panel, "popuphiding", this.onPopupHiding, true);
@@ -253,60 +253,89 @@ Magnifier.prototype = {
     listen(this.chromeWin, this.panel, "DOMMouseScroll", this.onMouseScrolled, true);
     this.chromeDoc.querySelector("#mainPopupSet").appendChild(this.panel);
 
-    let hbox = this.chromeDoc.createElement("hbox");
-    let box = this.chromeDoc.createElement("box");
-    box.setAttribute("style", "display:block; position: relative");
-
-    hbox.appendChild(box);
-    let zoomSlider = this.chromeDoc.createElement("vbox");
-    zoomSlider.setAttribute("flex", "1");
-    let (spacer = this.chromeDoc.createElement("spacer")) {
-      spacer.setAttribute("flex", "1");
-      zoomSlider.appendChild(spacer);
+    // Left/Upper box containing the color and zoom information
+    let (firstPane = this.chromeDoc.createElement("vbox")) {
+      firstPane.setAttribute("style", "margin: 0px 2px");
+      let (colorInfoBox = this.chromeDoc.createElement("box")) {
+        colorInfoBox.setAttribute("orient", "horizontal");
+        colorInfoBox.setAttribute("style", "padding: 10px");
+        // Color Box
+        this.colorbox = this.chromeDoc.createElement("box");
+        this.colorbox.setAttribute("style", "width: 32px; border: 1px solid #333");
+        // Color Name
+        this.colortext = this.chromeDoc.createElement("textbox");
+        this.colortext.setAttribute("style", "border: 1px solid #333;color:#eee");
+        this.colortext.className = "devtools-searchinput";
+        // Start/Stop Rendering button
+        let XHTML = "http://www.w3.org/1999/xhtml";
+        this.resetButton = this.chromeDoc.createElementNS(XHTML, "div");
+        this.resetButton.innerHTML = "Restart Drawing";
+        this.resetButton.setAttribute("style", "text-decoration: none; margin: 2px;" +
+          "padding: 3px; cursor: pointer;color:#eee");
+        if (this.isRendering)
+          this.resetButton.innerHTML = "Lock Zoom";
+        listen(this.chromeWin, this.resetButton, "click", this.startRenderingLoop, true);
+        // Show/Hide Options button
+        this.toggleOptions = this.chromeDoc.createElement("toolbarbutton");
+        this.toggleOptions.className = "chromeclass-toolbar-additional toolbarbutton-1";
+        this.toggleOptions.setAttribute("style", "list-style-image: url(" +
+          (this.optionsVisible?ICON_LEFT_ARROW:ICON_RIGHT_ARROW) +")");
+        this.toggleOptions.onclick = this.toggleOptionPane;
+        colorInfoBox.appendChild(this.colorbox);
+        colorInfoBox.appendChild(this.colortext);
+        colorInfoBox.appendChild(this.resetButton);
+        let (spacer = this.chromeDoc.createElement("spacer")) {
+          spacer.setAttribute("flex", "1");
+          colorInfoBox.appendChild(spacer);
+        }
+        colorInfoBox.appendChild(this.toggleOptions);
+        firstPane.appendChild(colorInfoBox);
+      }
+      let (canvasBox = this.chromeDoc.createElement("box")) {
+        canvasBox.setAttribute("style", "display:block; position: relative; margin: 5px 10px");
+        let XHTML = "http://www.w3.org/1999/xhtml";
+        // Canvas displaying zoomed screen
+        this.canvas = this.chromeDoc.createElementNS(XHTML, "canvas");
+        this.ctx = this.canvas.getContext("2d");
+        this.canvas.setAttribute("style", "image-rendering:-moz-crisp-edges;background-color:black");
+        canvasBox.appendChild(this.canvas);
+        // Grid separating each pixel
+        this.grid = this.chromeDoc.createElement("box");
+        this.grid.setAttribute("style", "position: absolute; top: 0; left: 0;");
+        canvasBox.appendChild(this.grid);
+        listen(this.chromeWin, this.grid, "click", this.onGridClicked, true);
+        // Crosshair highlighting the pixel
+        this.crosshair = this.chromeDoc.createElement("box");
+        this.crosshair.setAttribute("style", "display: block; position: absolute;"
+          + "border-width: 2px; border-style: solid; -moz-box-sizing: content-box;"
+          + "margin-left: -1px; margin-top: -1px; pointer-events: none;");
+        canvasBox.appendChild(this.crosshair);
+        this.canvasBox = canvasBox;
+        firstPane.appendChild(canvasBox);
+      }
+      let (spacer = this.chromeDoc.createElement("spacer")) {
+        spacer.setAttribute("flex", "1");
+        firstPane.appendChild(spacer);
+      }
+      let (sizeBox = this.chromeDoc.createElement("hbox")) {
+        sizeBox.setAttribute("style", "max-height: 3px;");
+        let (spacer = this.chromeDoc.createElement("spacer")) {
+          spacer.setAttribute("flex", "1");
+          sizeBox.appendChild(spacer);
+        }
+        let resizer = this.chromeDoc.createElement("box");
+        resizer.setAttribute("draggable", "true");
+        resizer.setAttribute("style", "min-height:3px;max-height:3px;margin:-5px 0px 5px;" +
+          "min-width:3px;max-width:3px;cursor: se-resize;-moz-appearance:resizer;");
+        listen(this.chromeWin, resizer, "mousedown", this.resizeDragStart);
+        listen(this.chromeWin, this.chromeWin, "mousemove", this.resizeDrag);
+        listen(this.chromeWin, this.chromeWin, "mouseup", this.resizeDragEnd);
+        this.resizer = resizer;
+        sizeBox.appendChild(resizer);
+        firstPane.appendChild(sizeBox);
+      }
+      this.panel.appendChild(firstPane);
     }
-    let label16 = this.chromeDoc.createElement("label");
-    label16.setAttribute("value", "16 x");
-    label16.setAttribute("style", "padding: 0px 1px");
-    zoomSlider.appendChild(label16);
-    let zoomScope = this.chromeDoc.createElement("box");
-    zoomScope.setAttribute("style", "min-width: 24px; max-width: 24px; min-height: 150px;" +
-                                    "background-repeat: no-repeat; border: 1px solid black;" +
-                                    "margin: 2px 6px");
-    zoomScope.style.backgroundImage = "-moz-linear-gradient(bottom, blue 1px, transparent 3px)";
-    zoomScope.style.backgroundSize = "100% " + ((150 - (this.zoomLevel - 2)*(150/14))/1.5) + "%";
-    zoomSlider.appendChild(zoomScope);
-    this.zoomScope = zoomScope;
-    listen(this.chromeWin, this.zoomScope, "click", this.onZoomClick);
-    let label2 = this.chromeDoc.createElement("label");
-    label2.setAttribute("value", "2 x");
-    label2.setAttribute("style", "padding: 0px 2px");
-    zoomSlider.appendChild(label2);
-    let (spacer = this.chromeDoc.createElement("spacer")) {
-      spacer.setAttribute("flex", "1");
-      zoomSlider.appendChild(spacer);
-    }
-    this.zoomSlider = zoomSlider;
-    hbox.appendChild(zoomSlider);
-    this.panel.appendChild(hbox);
-
-    let XHTML = "http://www.w3.org/1999/xhtml";
-    this.canvas = this.chromeDoc.createElementNS(XHTML, "canvas");
-    this.ctx = this.canvas.getContext("2d");
-    this.canvas.setAttribute("style", "image-rendering:-moz-crisp-edges;"
-      + "border: 1px solid white; background-color:black");
-    box.appendChild(this.canvas);
-
-    this.grid = this.chromeDoc.createElement("box");
-    this.grid.setAttribute("style", "position: absolute; top: 0; left: 0;");
-    box.appendChild(this.grid);
-    listen(this.chromeWin, this.grid, "click", this.onGridClicked, true);
-
-    this.crosshair = this.chromeDoc.createElement("box");
-    this.crosshair.setAttribute("style", "display: block; position: absolute;"
-      + "border-width: 2px; border-style: solid; -moz-box-sizing: content-box;"
-      + "margin-left: -1px; margin-top: -1px; pointer-events: none;");
-    box.appendChild(this.crosshair);
-
     this.setupZoom();
   },
   updateGridColor: function magnifier_updateGridColor() {
@@ -376,14 +405,11 @@ Magnifier.prototype = {
   },
   /* ---------- Content copy ---------- */
   startRenderingLoop: function() {
-    if (!this.isRendering)
-      this.canvas.style.border = "1px solid white";
     this.isRendering = true;
     this.resetButton.innerHTML = "Lock Zoom";
     this.update();
   },
   stopRenderingLoop: function() {
-    this.canvas.style.border = "1px solid black";
     this.resetButton.innerHTML = "Restart Drawing";
     this.isRendering = false;
   },
@@ -461,11 +487,24 @@ Magnifier.prototype = {
     this.stopRenderingLoop();
     this.deattachPageEvents();
   },
-  onButtonClick: function magnifier_onButtonClick() {
+  onButtonClick: function magnifier_onButtonClick(e) {
     if (this.isOpen) {
       this.panel.hidePopup();
     } else {
       this.panel.openPopupAtScreen(this.position.left, this.position.top, false);
+    }
+  },
+  toggleOptionPane: function magnifier_toggleOptionPane(e) {
+    this.toggleOptions.setAttribute("style", "list-style-image: url(" +
+      (this.optionsVisible?ICON_RIGHT_ARROW:ICON_LEFT_ARROW) +")");
+    this.optionsVisible = !this.optionsVisible;
+    if (this.optionsVisible) {
+      this.secondPane.style.opacity = 1;
+      this.secondPane.style.margin = "0px 2px";
+    }
+    else {
+      this.secondPane.style.opacity = 0;
+      this.secondPane.style.margin = "0px -175px 0px 0px";
     }
   },
   onTabSelect: function magnifier_onTabSelect(e) {
@@ -476,8 +515,8 @@ Magnifier.prototype = {
     this.zoomWindow.x = (this.zoomChrome? e.screenX: e.clientX) - this.zoomWindow.width / 2;
     this.zoomWindow.y = (this.zoomChrome? e.screenY: e.clientY) - this.zoomWindow.height / 2;
     if (this.state == 1 && this.zoomChrome && this.isRendering) {
-      this.panel.moveTo(e.screenX - this.panel.boxObject.width / 2 + this.zoomLevel,
-                        e.screenY - this.panel.boxObject.height / 2 + this.zoomLevel);
+      this.panel.moveTo(e.screenX - this.position.width / 2 - this.zoomLevel / 2 - 15,
+                        e.screenY - this.position.height / 2 - this.zoomLevel / 2 - 50);
     }
   },
   onMouseScrolled: function magnifier_onMouseScrolled(e) {
@@ -488,14 +527,14 @@ Magnifier.prototype = {
     this.zoomWindow.width = gWidth;
     this.zoomWindow.height = gHeight;
     this.zoomWindow.zoom = this.zoomLevel;
-    this.zoomScope.style.backgroundSize = "100% " + ((150 - (this.zoomLevel - 2)*(150/14))/1.5) + "%";
+    this.zoomScope.style.backgroundSize = ((this.zoomLevel - 2)*(100/14)) + "% 100%";
     this.setupZoom();
     this.stopRenderingLoop();
     this.startRenderingLoop();
   },
   onZoomClick: function magnifier_onZoomClick(e) {
     try {
-      this.zoomLevel = 16 - Math.floor((e.screenY + 10 - this.zoomScope.boxObject.y)/(150/14));
+      this.zoomLevel = 2 + Math.floor((e.screenX + 10 - this.zoomScope.boxObject.x)/(100/14));
     } catch (ex) {return;}
     this.zoomLevel = Math.min(Math.max(this.zoomLevel, 2), 16);
     let gWidth = Math.floor(this.position.width / this.zoomLevel) + 1;
@@ -503,19 +542,24 @@ Magnifier.prototype = {
     this.zoomWindow.width = gWidth;
     this.zoomWindow.height = gHeight;
     this.zoomWindow.zoom = this.zoomLevel;
-    this.zoomScope.style.backgroundSize = "100% " + ((150 - (this.zoomLevel - 2)*(150/14))/1.5) + "%";
+    this.zoomScope.style.backgroundSize = ((this.zoomLevel - 2)*(100/14)) + "% 100%";
     this.setupZoom();
     this.stopRenderingLoop();
     this.startRenderingLoop();
   },
   onMouseClick: function magnifier_onMouseClick(e) {
-    if (e.screenX >= this.zoomScope.boxObject.x &&
-        e.screenX <= this.zoomScope.boxObject.x + this.zoomScope.boxObject.width &&
-        e.screenY >= this.zoomScope.boxObject.y - 8 &&
-        e.screenY <= this.zoomScope.boxObject.y + this.zoomScope.boxObject.height + 8) {
-      this.onZoomClick({screenY: e.screenY});
+    if (e.screenX >= this.zoomScope.boxObject.x -8 &&
+        e.screenX <= this.zoomScope.boxObject.x + this.zoomScope.boxObject.width + 8 &&
+        e.screenY >= this.zoomScope.boxObject.y &&
+        e.screenY <= this.zoomScope.boxObject.y + this.zoomScope.boxObject.height) {
+      this.onZoomClick({screenX: e.screenX});
       return;
     }
+    else if (this.zoomChrome && !(e.screenX >= this.canvasBox.boxObject.x &&
+             e.screenX <= this.canvasBox.boxObject.x + this.canvasBox.boxObject.width &&
+             e.screenY >= this.canvasBox.boxObject.y &&
+             e.screenY <= this.canvasBox.boxObject.y + this.canvasBox.boxObject.height))
+      return;
     if (!this.isRendering) return;
     this.stopRenderingLoop();
     e.preventDefault();
