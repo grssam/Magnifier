@@ -579,14 +579,17 @@ Magnifier.prototype = {
       return;
     let width = this.dragStart.width + e.screenX - this.dragStart.x;
     let height = this.dragStart.height + e.screenY - this.dragStart.y;
-    this.position.width = this.dragStart.origWidth + e.screenX - this.dragStart.x;
-    this.position.height = this.dragStart.origHeight + e.screenY - this.dragStart.y;
-    this.zoomWindow.width = Math.floor(this.position.width / this.zoomLevel) + 1;
-    this.zoomWindow.height = Math.floor(this.position.height / this.zoomLevel) + 1;
-    this.setupZoom();
     e.preventDefault();
     e.stopPropagation();
-    this.panel.sizeTo(width, height);
+    if (width > 350) {
+      this.position.width = this.dragStart.origWidth + e.screenX - this.dragStart.x;
+      this.zoomWindow.width = Math.floor(this.position.width / this.zoomLevel) + 1;
+    }
+    if (height > 350) {
+      this.position.height = this.dragStart.origHeight + e.screenY - this.dragStart.y;
+      this.zoomWindow.height = Math.floor(this.position.height / this.zoomLevel) + 1;
+    }
+    this.setupZoom();
   },
   resizeDragEnd: function magnifier_resizeDragEnd(e) {
     if (!this.dragMouseDown)
