@@ -58,11 +58,11 @@ pref.defaults = {
   version: 0.2,
   buttonNextSiblingID: "",
   buttonParentID: "addon-bar",
-  zoomChrome: false,
   docked: false,
   JSONrect: '{"top":0,"left":0,"width":0,"height":0}',
+  showGrid: true,
   zoomLevel: 8,
-  state: 0      // 0: normal dragable panel, 1: panel will move with mouse.
+  state: 0      // 0: normal dragable panel, 1: Panel will zoom the whole browser, 2: Panel will move with mouse.
 };
 
 pref.observe = function(prefs, callback) {

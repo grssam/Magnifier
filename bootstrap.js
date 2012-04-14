@@ -56,7 +56,6 @@ function Magnifier(aWindow) {
   this.tabbrowser = aWindow.gBrowser;
   this.chromeDoc = aWindow.document;
   // Preferences
-  this.zoomChrome = pref("zoomChrome");
   this.docked = pref("docked");
   this.position = JSON.parse(pref("JSONrect"));
   this.state = pref("state");
@@ -73,17 +72,22 @@ function Magnifier(aWindow) {
   this.onGridClicked = this.onGridClicked.bind(this);
   this.onGridKeyPressed = this.onGridKeyPressed.bind(this);
   this.startRenderingLoop = this.startRenderingLoop.bind(this);
-  this.onZoomChromeChange = this.onZoomChromeChange.bind(this);
+  this.toggleRendering = this.toggleRendering.bind(this);
+  this.onStateChange = this.onStateChange.bind(this);
   this.toggleOptionPane = this.toggleOptionPane.bind(this);
-  this.panelStateChange = this.panelStateChange.bind(this);
   this.onMouseScrolled = this.onMouseScrolled.bind(this);
   this.onZoomClick = this.onZoomClick.bind(this);
   this.resizeDragStart = this.resizeDragStart.bind(this);
   this.resizeDrag = this.resizeDrag.bind(this);
   this.resizeDragEnd = this.resizeDragEnd.bind(this);
-  this.saveToolbarButtonInfo= this.saveToolbarButtonInfo.bind(this);
+  this.panelDragStart = this.panelDragStart.bind(this);
+  this.panelDrag = this.panelDrag.bind(this);
+  this.panelDragEnd = this.panelDragEnd.bind(this);
+  this.saveToolbarButtonInfo = this.saveToolbarButtonInfo.bind(this);
+  this.changeColorFormat = this.changeColorFormat.bind(this);
   this.isOpen = false;
   this.optionsVisible = false;
+  this.colorFormat = "RGB";
 
   this._init();
 }
@@ -117,7 +121,14 @@ Magnifier.prototype = {
       width: -1,
     }
 
+    this.panelDragOffset = {
+      x: 0,
+      y: 0,
+    }
+
     this.buildButton();
+    this.createHotKey();
+    this.addMenuItem();
     this.buildPanel();
     this.buildOptionsPanel();
 
@@ -126,28 +137,24 @@ Magnifier.prototype = {
   destroy: function magnifier_destroy() {
     // Clearing the memory.
     this.destroyButton();
+    this.removeMenuItem();
+    this.removeKey();
     this.panel.hidePopup();
     this.panel.parentNode.removeChild(this.panel);
     this.panel = null;
-    this.button.parentNode.removeChild(this.button);
-    this.button = null;
   },
-  onZoomChromeChange: function magnifier_onZoomChromeChange(e) {
-    e.stopPropagation();
-    e.preventDefault();
-    this.stopRenderingLoop();
-    this.deattachPageEvents();
-    this.zoomChrome = !this.zoomChrome;
-    this.moveWithMouseOption.disabled = !this.zoomChrome;
-    this.attachPageEvents();
-    this.startRenderingLoop();
-  },
-  panelStateChange: function magnifier_panelStateChange(e) {
-    e.stopPropagation();
-    e.preventDefault();
-    this.state = (++this.state)%2;
-    this.stopRenderingLoop();
-    this.startRenderingLoop();
+  onStateChange: function magnifier_onStateChange(e) {
+    let self = this;
+    this.stateList.blur();
+    this.chromeWin.setTimeout(function() {
+      e.stopPropagation();
+      e.preventDefault();
+      self.stopRenderingLoop();
+      self.deattachPageEvents();
+      self.state = self.stateList.selectedIndex;
+      self.attachPageEvents();
+      self.startRenderingLoop();
+    }, 50);
   },
   setupZoom: function magnifier_setupZoom() {
     this.canvas.width = this.zoomWindow.width;
@@ -172,19 +179,27 @@ Magnifier.prototype = {
   },
   /* ---------- UI builders ---------- */
   buildOptionsPanel: function magnifier_buildOptionsPanel() {
+    let XHTML = "http://www.w3.org/1999/xhtml";
     let (secondPane = this.chromeDoc.createElement("vbox")) {
       secondPane.setAttribute("orient", "vertical");
       secondPane.setAttribute("style", "border: solid #aaa;" +
                                        "border-width: 0px 0px 0px 1px; padding: 10px 4px;" +
                                        "-moz-transition-property: opacity, margin;" +
                                        "-moz-transition-duration: 400ms, 300ms;");
+      this.secondPane = secondPane;
       if (this.optionsVisible) {
         secondPane.style.opacity = 1;
         secondPane.style.margin = "0px 2px";
       }
       else {
         secondPane.style.opacity = 0;
-        secondPane.style.margin = "0px -175px 0px 0px";
+        secondPane.style.margin = "0px -167px 0px 0px";
+      }
+      let (zoomLabel = this.chromeDoc.createElementNS(XHTML, "div")) {
+        zoomLabel.innerHTML = "Zoom Level";
+        zoomLabel.setAttribute("style", "text-decoration: none; margin: 4px 2px 0px 2px;" +
+          "padding: 3px;color:#eee; font-weight: bold; text-align:center");
+        secondPane.appendChild(zoomLabel);
       }
       let (zoomSlider = this.chromeDoc.createElement("hbox")) {
         zoomSlider.setAttribute("flex", "1");
@@ -209,28 +224,49 @@ Magnifier.prototype = {
         label16.setAttribute("value", "16x");
         label16.setAttribute("style", "padding: 4px 2px;color:#eee");
         zoomSlider.appendChild(label16);
-        this.secondPane = secondPane;
         secondPane.appendChild(zoomSlider);
       }
-       let (optionsBox = this.chromeDoc.createElement("box")) {
+      let (optionsBox = this.chromeDoc.createElement("box")) {
         optionsBox.setAttribute("orient", "vertical");
-        let zoomChromeOption = this.chromeDoc.createElement("checkbox");
-        zoomChromeOption.setAttribute("label", "Zoom the whole Browser");
-        zoomChromeOption.setAttribute("style", "color:#eee");
-        zoomChromeOption.setAttribute("checked", this.zoomChrome);
-        this.zoomChromeOption = zoomChromeOption;
-        listen(this.chromeWin, zoomChromeOption, "command", this.onZoomChromeChange);
-        optionsBox.appendChild(zoomChromeOption);
-        let moveWithMouseOption = this.chromeDoc.createElement("checkbox");
-        moveWithMouseOption.setAttribute("label", "Move with mouse");
-        moveWithMouseOption.setAttribute("checked", (this.state == 1));
-        moveWithMouseOption.setAttribute("style", "color:#eee");
-        moveWithMouseOption.setAttribute("disabled", !this.zoomChrome);
-        this.moveWithMouseOption = moveWithMouseOption;
-        listen(this.chromeWin, moveWithMouseOption, "command", this.panelStateChange);
-        optionsBox.appendChild(moveWithMouseOption);
+        let (modeLabel = this.chromeDoc.createElementNS(XHTML, "div")) {
+          modeLabel.innerHTML = "Mode";
+          modeLabel.setAttribute("style", "text-decoration: none; margin: 4px 2px 0px 2px;" +
+            "padding: 3px;color:#eee; font-weight: bold; text-align:center");
+          optionsBox.appendChild(modeLabel);
+        }
+        // Zoom content or chrome option
+        let stateList = this.chromeDoc.createElement("menulist");
+        stateList.setAttribute("style", "margin: 2px 5px 5px 5px;vertical-align: middle;" +
+          "border-radius: 0px 2px 2px 0px !important; -moz-appearance: none;text-align:center;" +
+          "height: 24px; width: 150px; border: 1px solid #333; color: hsl(210,30%,85%);" +
+          "background:-moz-linear-gradient(top, rgba(125,125,125,0.25) 0%, rgba(14,14,14,0.25) 100%) !important");
+        let (menupop = this.chromeDoc.createElement("menupopup")) {
+          menupop.setAttribute("style", "border: 1px solid #333; color: #eee; background: rgb(125,125,125)");
+          ["Content Zoom", "Browser Zoom", "Mouse Zoom"].forEach(function(label) {
+            let item = this.chromeDoc.createElement("menuitem");
+            item.setAttribute("label", label);
+            menupop.appendChild(item);
+          }.bind(this));
+          stateList.appendChild(menupop);
+        }
+        this.stateList = stateList;
+        listen(this.chromeWin, stateList, "command", this.onStateChange);
+        optionsBox.appendChild(stateList);
+        let (optionLabel = this.chromeDoc.createElementNS(XHTML, "div")) {
+          optionLabel.innerHTML = "Options";
+          optionLabel.setAttribute("style", "text-decoration: none; margin: 4px 2px 0px 2px;" +
+            "padding: 3px;color:#eee; font-weight: bold; text-align:center");
+          optionsBox.appendChild(optionLabel);
+        }
+        // Show gridlines option
+        let showGridOption = this.chromeDoc.createElement("checkbox");
+        showGridOption.setAttribute("label", "Show Gridlines");
+        showGridOption.setAttribute("checked", pref("showGrid"));
+        showGridOption.setAttribute("style", "color:#eee; margin-left:24px;");
+        this.showGridOption = showGridOption;
+        optionsBox.appendChild(showGridOption);
         secondPane.appendChild(optionsBox);
-      } 
+      }
       this.panel.appendChild(secondPane);
     }
   },
@@ -239,17 +275,19 @@ Magnifier.prototype = {
     this.panel.id = "devtools-magnifier-panel";
     this.panel.setAttribute("noautofocus", true);
     this.panel.setAttribute("noautohide", true);
-    this.panel.setAttribute("backdrag", true);
     this.panel.setAttribute("level", "floating");
     this.panel.setAttribute("orient", "horizontal");
 
-    this.panel.setAttribute("style", "border-radius: 4px; border:1px solid #111;");
-    this.panel.style.backgroundImage = "-moz-linear-gradient(top, #7d7e7d 0%, #0e0e0e 100%)";
+    this.panel.setAttribute("style", "border-radius: 4px; border:1px solid #111;" +
+      "-moz-appearance:none; background:-moz-linear-gradient(top, #7d7e7d 0%, #0e0e0e 100%) !important");
 
     listen(this.chromeWin, this.panel, "popupshown", this.onPopupShown, true);
     listen(this.chromeWin, this.panel, "popuphiding", this.onPopupHiding, true);
     listen(this.chromeWin, this.panel, "keypress", this.onKeyPressed, true);
     listen(this.chromeWin, this.panel, "keydown", this.onGridKeyPressed, true);
+    listen(this.chromeWin, this.panel, "mousedown", this.panelDragStart, true);
+    listen(this.chromeWin, this.chromeWin, "mousemove", this.panelDrag, true);
+    listen(this.chromeWin, this.chromeWin, "mouseup", this.panelDragEnd, true);
     listen(this.chromeWin, this.panel, "DOMMouseScroll", this.onMouseScrolled, true);
     this.chromeDoc.querySelector("#mainPopupSet").appendChild(this.panel);
 
@@ -261,11 +299,28 @@ Magnifier.prototype = {
         colorInfoBox.setAttribute("style", "padding: 10px");
         // Color Box
         this.colorbox = this.chromeDoc.createElement("box");
-        this.colorbox.setAttribute("style", "width: 32px; border: 1px solid #333");
+        this.colorbox.setAttribute("style", "width: 32px; border: 1px solid #333;border-radius: 1px !important;");
         // Color Name
         this.colortext = this.chromeDoc.createElement("textbox");
-        this.colortext.setAttribute("style", "border: 1px solid #333;color:#eee");
+        this.colortext.setAttribute("style", "border: solid #333;color:#eee;" +
+          "border-radius: 2px 0px 0px 2px !important; border-width: 1px 0px 1px 1px;" +
+          "background-position:4% center; width:120px; height: 24px; margin-right: 0px");
         this.colortext.className = "devtools-searchinput";
+        this.colorFormatList = this.chromeDoc.createElement("menulist");
+        this.colorFormatList.setAttribute("style", "margin: 0px;vertical-align: middle;" +
+          "border-radius: 0px 2px 2px 0px !important; -moz-appearance: none;text-align:center;" +
+          "height: 24px; width: 50px; border: 1px solid #333; color: hsl(210,30%,85%);" +
+          "background:-moz-linear-gradient(top, rgba(125,125,125,0.25) 0%, rgba(14,14,14,0.25) 100%) !important");
+        let (menupop = this.chromeDoc.createElement("menupopup")) {
+          menupop.setAttribute("style", "border: 1px solid #333; color: #eee; background: rgb(125,125,125)");
+          ["RGB", "HSL", "Hex"].forEach(function(label) {
+            let item = this.chromeDoc.createElement("menuitem");
+            item.setAttribute("label", label);
+            menupop.appendChild(item);
+          }.bind(this));
+          this.colorFormatList.appendChild(menupop);
+        }
+        listen(this.chromeWin, this.colorFormatList, "command", this.changeColorFormat);
         // Start/Stop Rendering button
         let XHTML = "http://www.w3.org/1999/xhtml";
         this.resetButton = this.chromeDoc.createElementNS(XHTML, "div");
@@ -274,7 +329,7 @@ Magnifier.prototype = {
           "padding: 3px; cursor: pointer;color:#eee");
         if (this.isRendering)
           this.resetButton.innerHTML = "Lock Zoom";
-        listen(this.chromeWin, this.resetButton, "click", this.startRenderingLoop, true);
+        this.resetButton.onclick = this.toggleRendering;
         // Show/Hide Options button
         this.toggleOptions = this.chromeDoc.createElement("toolbarbutton");
         this.toggleOptions.className = "chromeclass-toolbar-additional toolbarbutton-1";
@@ -283,6 +338,7 @@ Magnifier.prototype = {
         this.toggleOptions.onclick = this.toggleOptionPane;
         colorInfoBox.appendChild(this.colorbox);
         colorInfoBox.appendChild(this.colortext);
+        colorInfoBox.appendChild(this.colorFormatList);
         colorInfoBox.appendChild(this.resetButton);
         let (spacer = this.chromeDoc.createElement("spacer")) {
           spacer.setAttribute("flex", "1");
@@ -339,6 +395,11 @@ Magnifier.prototype = {
     this.setupZoom();
   },
   updateGridColor: function magnifier_updateGridColor() {
+    if (!this.showGridOption.checked) {
+      this.grid.style.backgroundImage = "-moz-linear-gradient(left, rgba(0,0,0,0) 1px, transparent 1px)," +
+                                        "-moz-linear-gradient(top, rgba(0,0,0,0) 1px, transparent 1px)";
+      return;
+    }
     let g = this.color.r + this.color.g + this.color.b;
     g = g / 3;
     let c = g < 128 ? "rgba(255,255,255," : "rgba(0,0,0,";
@@ -357,6 +418,7 @@ Magnifier.prototype = {
   destroyButton: function magnifier_destroyButton() {
     try {
       this.button.parentNode.removeChild(this.button);
+      this.button = null;
     } catch (ex) {}
   },
   saveToolbarButtonInfo: function magnifier_saveTooolbarButtonInfo() {
@@ -403,6 +465,61 @@ Magnifier.prototype = {
 
     return this.button = button;
   },
+  removeMenuItem: function magnifier_removeMenuItem() {
+    try {
+      this.menuitem.parentNode.removeChild(this.menuitem);
+      this.menuitem = null;
+      this.appitem.parentNode.removeChild(this.appitem);
+      this.appitem = null;
+    } catch(ex) {}
+  },
+  addMenuItem: function magnifier_addMenuItem() {
+    let XUL = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+    let menuitem = this.chromeDoc.createElementNS(XUL, "menuitem");
+    menuitem.setAttribute("id", "devtools-magnifier-tools-menu");
+    menuitem.setAttribute("label", "Magnifier");
+    menuitem.setAttribute("accesskey", "M");
+    menuitem.setAttribute("key", "devtools-magnifier-key");
+    menuitem.onclick = this.onButtonClick;
+    this.menuitem = menuitem;
+    this.chromeDoc.getElementById("menuWebDeveloperPopup").
+      insertBefore(menuitem, this.chromeDoc.getElementById("webConsole"));
+
+    if (this.chromeWin.navigator.oscpu.search(/^window/i) > -1) {
+      let appMenu = this.chromeDoc.getElementById("appmenu_webDeveloper_popup");
+      if (appMenu) {
+        let appMenuItem = this.chromeDoc.createElementNS(XUL, "menuitem");
+        appMenuItem.setAttribute("id", "appmenu_devtools-magnifier");
+        appMenuItem.setAttribute("label", "Magnifier");
+        appMenuItem.setAttribute("accesskey", "M");
+        appMenuItem.setAttribute("key", "devtools-magnifier-key");
+        appMenuItem.onclick = this.onButtonClick;
+        this.appitem = appMenuItem;
+        appMenu.insertBefore(appMenuItem, this.chromeDoc.getElementById("appmenu_webConsole"));
+      }
+    }
+  },
+  removeKey: function magnifier_removeKey() {
+    try {
+      this.keyset.parentNode.removeChild(this.keyset);
+      this.keyset = null;
+    } catch(ex) {}
+  },
+  createHotKey: function magnifier_createHotKey() {
+    let XUL = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+    let keyset = this.chromeDoc.createElementNS(XUL, "keyset");
+    keyset.setAttribute("id", "devtools-magnifier-keyset");
+    this.keyset = keyset;
+    // add hotkey
+    let key = this.chromeDoc.createElementNS(XUL, "key");
+    key.setAttribute("id", "devtools-magnifier-key");
+    key.setAttribute("key", "M");
+    key.setAttribute("modifiers", "accel,shift");
+    key.setAttribute("oncommand", "void(0);");
+    listen(this.chromeWin, key, "command", this.onButtonClick);
+    this.chromeDoc.getElementById("mainKeyset").parentNode.
+      appendChild(keyset).appendChild(key);
+  },
   /* ---------- Content copy ---------- */
   startRenderingLoop: function() {
     this.isRendering = true;
@@ -413,26 +530,39 @@ Magnifier.prototype = {
     this.resetButton.innerHTML = "Restart Drawing";
     this.isRendering = false;
   },
+  toggleRendering: function magnifier_toggleRendering() {
+    if (this.isRendering)
+      this.stopRenderingLoop();
+    else
+      this.startRenderingLoop();
+  },
   update: function magnifier_update() {
-    let win = this.zoomChrome? this.chromeWin:
-                               this.tabbrowser.selectedBrowser.contentWindow;
+    let win = this.state > 0? this.chromeWin:
+                              this.tabbrowser.selectedBrowser.contentWindow;
     if (win) { // Why do I need to do that?
       let x = this.zoomWindow.x + 1, y = this.zoomWindow.y + 1;
-      if (this.zoomChrome) { // Some wierd adjustments
+      if (this.state > 0) { // Some wierd adjustments
         x -= win.screenX + 8;
         y -= win.screenY;
       }
       else {
-        x -= win.scrollX;
-        y -= win.scrollY;
+        x += win.scrollX;
+        y += win.scrollY;
       }
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
       this.ctx.drawWindow(win, x, y, this.zoomWindow.width, this.zoomWindow.height, "white");
     }
-    else
-      this.chromeWin.alert("ASD");
     if (this.isRendering) this.chromeWin.mozRequestAnimationFrame(this.update);
     this.updateColor();
+  },
+  changeColorFormat: function magnifier_changeColorFormat() {
+    let self = this;
+    this.colorFormatList.blur();
+    this.chromeWin.setTimeout(function() {
+      self.colorFormat = this.colorFormatList.getItemAtIndex(this.colorFormatList.selectedIndex).label;
+      self.startRenderingLoop();
+      self.updateColor();
+    }, 50);
   },
   updateColor: function magnifier_updateColor() {
     let pixel = this.ctx.getImageData(this.zoomWindow.cx, this.zoomWindow.cy, 1, 1).data;
@@ -440,23 +570,76 @@ Magnifier.prototype = {
     let g = ~~pixel[1];
     let b = ~~pixel[2];
     this.color = {r:r, g:g, b:b};
-    this.colorName = "rgb(" + r + "," + g + "," + b + ")";
+    if (this.colorFormat == "RGB")
+      this.colorName = "rgb(" + r + "," + g + "," + b + ")";
+    else if (this.colorFormat == "HSL") {
+      let {h,s,l} = this.RGB2HSL(this.color);
+      this.colorName = "hsl(" + h + "," + s + "," + l + ")";
+    }
+    else {
+      let hex = this.RGB2Hex(this.color);
+      this.colorName = "#" + hex;
+    }
     this.colorbox.style.backgroundColor = this.colorName;
     this.colortext.value = this.colorName;
     this.updateGridColor();
   },
+  RGB2HSL: function magnifier_RGB2HSL({r,g,b}) {
+    let h, s, l, min, max, delta;
+    if (r > g){
+      max = Math.max (r, b);
+      min = Math.min (g, b);
+    } else{
+      max = Math.max (g, b);
+      min = Math.min (r, b);
+    }
+    l = (max + min) / 2.0;
+
+    if (max == min) {
+      s = 0.0;
+      h = 0.0;
+    } else {
+      delta = (max - min);
+      if (l < 128) {
+        s = 255 * delta / (max + min);
+      } else {
+        s = 255 * delta / (511 - max - min);
+      }
+      if (r == max) {
+        h = (g - b) / delta;
+      } else if (g == max) {
+        h = 2 + (b - r) / delta;
+      } else {
+        h = 4 + (r - g) / delta;
+      }
+      h = h * 42.5;
+      if (h < 0){ h += 255; }
+      else if (h > 255){ h -= 255; }
+    }
+
+    h = Math.round(h);
+    s = Math.round(s);
+    l = Math.round(l);
+    return {h:h,s:s,l:l};
+  },
+  RGB2Hex: function magnifier_RGB2Hex({r,g,b}) {
+    function hex(x) {
+      return ("0" + parseInt(x).toString(16)).slice(-2);
+    }
+    return "" + hex(r) + hex(g) + hex(b);
+  },
   /* ---------- Events and callbacks ---------- */
   attachPageEvents: function magnifier_attachPageEvents() {
-    let win = this.zoomChrome? this.chromeWin:
-                               this.tabbrowser.selectedBrowser;
+    let win = this.state > 0? this.chromeWin:
+                              this.tabbrowser.selectedBrowser;
     win.addEventListener("mousemove", this.onMouseMove, true);
     win.addEventListener("click", this.onMouseClick, true);
     win.addEventListener("keypress", this.onKeyPressed, true);
     win.addEventListener("keydown", this.onGridKeyPressed, true);
   },
   deattachPageEvents: function magnifier_deattachPageEvents() {
-    let win = this.zoomChrome? this.chromeWin:
-                               this.tabbrowser.selectedBrowser;
+    let win = this.state > 0? this.chromeWin:
+                              this.tabbrowser.selectedBrowser;
     win.removeEventListener("mousemove", this.onMouseMove, true);
     win.removeEventListener("click", this.onMouseClick, true);
     win.removeEventListener("keypress", this.onKeyPressed, true);
@@ -467,6 +650,7 @@ Magnifier.prototype = {
       return;
     this.button.setAttribute("style", "list-style-image: url(" + ICON_OPEN + ")");
     this.isOpen = true;
+    this.stateList.selectedIndex = this.state;
     this.startRenderingLoop();
     this.attachPageEvents();
   },
@@ -480,7 +664,7 @@ Magnifier.prototype = {
     pref("state", this.state);
     pref("zoomLevel", this.zoomLevel);
     pref("docked", this.docked);
-    pref("zoomChrome", this.zoomChrome);
+    pref("showGrid", this.showGridOption.checked);
 
     this.button.setAttribute("style", "list-style-image: url(" + ICON_CLOSE + ")");
     this.isOpen = false;
@@ -504,17 +688,17 @@ Magnifier.prototype = {
     }
     else {
       this.secondPane.style.opacity = 0;
-      this.secondPane.style.margin = "0px -175px 0px 0px";
+      this.secondPane.style.margin = "0px -167px 0px 0px";
     }
   },
   onTabSelect: function magnifier_onTabSelect(e) {
-    if (this.isOpen && !this.zoomChrome)
+    if (this.isOpen && this.state == 0)
       this.panel.hidePopup();
   },
   onMouseMove: function magnifier_onMouseMove(e) {
-    this.zoomWindow.x = (this.zoomChrome? e.screenX: e.clientX) - this.zoomWindow.width / 2;
-    this.zoomWindow.y = (this.zoomChrome? e.screenY: e.clientY) - this.zoomWindow.height / 2;
-    if (this.state == 1 && this.zoomChrome && this.isRendering) {
+    this.zoomWindow.x = (this.state > 0? e.screenX: e.clientX) - this.zoomWindow.width / 2;
+    this.zoomWindow.y = (this.state > 0? e.screenY: e.clientY) - this.zoomWindow.height / 2;
+    if (this.state == 2 && this.isRendering) {
       this.panel.moveTo(e.screenX - this.position.width / 2 - this.zoomLevel / 2 - 15,
                         e.screenY - this.position.height / 2 - this.zoomLevel / 2 - 50);
     }
@@ -529,8 +713,6 @@ Magnifier.prototype = {
     this.zoomWindow.zoom = this.zoomLevel;
     this.zoomScope.style.backgroundSize = ((this.zoomLevel - 2)*(100/14)) + "% 100%";
     this.setupZoom();
-    this.stopRenderingLoop();
-    this.startRenderingLoop();
   },
   onZoomClick: function magnifier_onZoomClick(e) {
     try {
@@ -544,8 +726,6 @@ Magnifier.prototype = {
     this.zoomWindow.zoom = this.zoomLevel;
     this.zoomScope.style.backgroundSize = ((this.zoomLevel - 2)*(100/14)) + "% 100%";
     this.setupZoom();
-    this.stopRenderingLoop();
-    this.startRenderingLoop();
   },
   onMouseClick: function magnifier_onMouseClick(e) {
     if (e.screenX >= this.zoomScope.boxObject.x -8 &&
@@ -555,15 +735,49 @@ Magnifier.prototype = {
       this.onZoomClick({screenX: e.screenX});
       return;
     }
-    else if (this.zoomChrome && !(e.screenX >= this.canvasBox.boxObject.x &&
+    else if (this.state > 0 && !(e.screenX >= this.canvasBox.boxObject.x &&
              e.screenX <= this.canvasBox.boxObject.x + this.canvasBox.boxObject.width &&
              e.screenY >= this.canvasBox.boxObject.y &&
-             e.screenY <= this.canvasBox.boxObject.y + this.canvasBox.boxObject.height))
+             e.screenY <= this.canvasBox.boxObject.y + this.canvasBox.boxObject.height) &&
+             (e.screenX >= this.panel.boxObject.x &&
+             e.screenX <= this.panel.boxObject.x + this.panel.boxObject.width &&
+             e.screenY >= this.panel.boxObject.y &&
+             e.screenY <= this.panel.boxObject.y + this.panel.boxObject.height))
       return;
     if (!this.isRendering) return;
     this.stopRenderingLoop();
     e.preventDefault();
     e.stopPropagation();
+  },
+  panelDragStart: function magnifier_panelDragStart(e) {
+    if (!this.optionsVisible && e.screenX >= this.secondPane.boxObject.x &&
+        e.screenX <= this.secondPane.boxObject.x + this.secondPane.boxObject.width &&
+        e.screenY >= this.secondPane.boxObject.y &&
+        e.screenY <= this.secondPane.boxObject.y + this.secondPane.boxObject.height)
+      return;
+    this.panelDragOffset.x = e.screenX - this.panel.boxObject.x;
+    this.panelDragOffset.y = e.screenY - this.panel.boxObject.y;
+    this.panelDragMouseDown = true;
+  },
+  panelDrag: function magnifier_panelDrag(e) {
+    if (!this.panelDragMouseDown || this.dragMouseDown) {
+      this.panelDragMouseDown = false;
+      return;
+    }
+    e.preventDefault();
+    let x = e.screenX, y = e.screenY;
+    if (this.panelDragOffset.x != null)
+      x -= this.panelDragOffset.x;
+    if (this.panelDragOffset.y != null)
+      y -= this.panelDragOffset.y;
+    this.panel.moveTo(x, y);
+  },
+  panelDragEnd: function magnifier_panelDragEnd(e) {
+    if (!this.panelDragMouseDown || this.dragMouseDown) {
+      this.panelDragMouseDown = false;
+      return;
+    }
+    this.panelDragMouseDown = false;
   },
   resizeDragStart: function magnifier_resizeDragStart(e) {
     this.dragStart.x = e.screenX;
@@ -573,6 +787,7 @@ Magnifier.prototype = {
     this.dragStart.width = this.panel.boxObject.width;
     this.dragStart.height = this.panel.boxObject.height;
     this.dragMouseDown = true;
+    this.stopRenderingLoop();
   },
   resizeDrag: function magnifier_resizeDrag(e) {
     if (this.dragStart.x == -1 || this.dragStart.y == -1 || !this.dragMouseDown)
@@ -590,6 +805,7 @@ Magnifier.prototype = {
       this.zoomWindow.height = Math.floor(this.position.height / this.zoomLevel) + 1;
     }
     this.setupZoom();
+    this.update();
   },
   resizeDragEnd: function magnifier_resizeDragEnd(e) {
     if (!this.dragMouseDown)
