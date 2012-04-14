@@ -304,8 +304,11 @@ Magnifier.prototype = {
         this.colortext = this.chromeDoc.createElement("textbox");
         this.colortext.setAttribute("style", "border: solid #333;color:#eee;" +
           "border-radius: 2px 0px 0px 2px !important; border-width: 1px 0px 1px 1px;" +
-          "background-position:4% center; width:120px; height: 24px; margin-right: 0px");
-        this.colortext.className = "devtools-searchinput";
+          "background-position:4% center; width:120px; height: 24px; margin: 0px 0px 0px 3px;" +
+          "background-color: transparent;-moz-appearance:none !important;background-image:" +
+          "url("+ICON_CLOSE+"),-moz-linear-gradient(hsla(210,16%,76%,.15), hsla(210,16%,76%,.35));" +
+          "background-repeat: no-repeat;padding-top:0;padding-bottom:0;-moz-padding-start:18px;" +
+          "-moz-padding-end: 12px;box-shadow: inset 0 1px 0 hsla(211,68%,6%,.05), 0 0 0 1px hsla(210,40%,83%,.1);");
         this.colorFormatList = this.chromeDoc.createElement("menulist");
         this.colorFormatList.setAttribute("style", "margin: 0px;vertical-align: middle;" +
           "border-radius: 0px 2px 2px 0px !important; -moz-appearance: none;text-align:center;" +
@@ -559,7 +562,7 @@ Magnifier.prototype = {
     let self = this;
     this.colorFormatList.blur();
     this.chromeWin.setTimeout(function() {
-      self.colorFormat = this.colorFormatList.getItemAtIndex(this.colorFormatList.selectedIndex).label;
+      self.colorFormat = self.colorFormatList.getItemAtIndex(self.colorFormatList.selectedIndex).label;
       self.startRenderingLoop();
       self.updateColor();
     }, 50);
