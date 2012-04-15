@@ -488,7 +488,7 @@ Magnifier.prototype = {
     this.chromeDoc.getElementById("menuWebDeveloperPopup").
       insertBefore(menuitem, this.chromeDoc.getElementById("webConsole"));
 
-    if (this.chromeWin.navigator.oscpu.search(/^window/i) > -1) {
+    if (this.chromeWin.navigator.oscpu.search(/^mac/i) == -1) {
       let appMenu = this.chromeDoc.getElementById("appmenu_webDeveloper_popup");
       if (appMenu) {
         let appMenuItem = this.chromeDoc.createElementNS(XUL, "menuitem");
@@ -563,7 +563,6 @@ Magnifier.prototype = {
     this.colorFormatList.blur();
     this.chromeWin.setTimeout(function() {
       self.colorFormat = self.colorFormatList.getItemAtIndex(self.colorFormatList.selectedIndex).label;
-      self.startRenderingLoop();
       self.updateColor();
     }, 50);
   },
@@ -699,6 +698,8 @@ Magnifier.prototype = {
       this.panel.hidePopup();
   },
   onMouseMove: function magnifier_onMouseMove(e) {
+    if (!this.isRendering)
+      return;
     this.zoomWindow.x = (this.state > 0? e.screenX: e.clientX) - this.zoomWindow.width / 2;
     this.zoomWindow.y = (this.state > 0? e.screenY: e.clientY) - this.zoomWindow.height / 2;
     if (this.state == 2 && this.isRendering) {
@@ -716,6 +717,8 @@ Magnifier.prototype = {
     this.zoomWindow.zoom = this.zoomLevel;
     this.zoomScope.style.backgroundSize = ((this.zoomLevel - 2)*(100/14)) + "% 100%";
     this.setupZoom();
+    if (!this.isRendering)
+      this.update();
   },
   onZoomClick: function magnifier_onZoomClick(e) {
     try {
@@ -729,6 +732,8 @@ Magnifier.prototype = {
     this.zoomWindow.zoom = this.zoomLevel;
     this.zoomScope.style.backgroundSize = ((this.zoomLevel - 2)*(100/14)) + "% 100%";
     this.setupZoom();
+    if (!this.isRendering)
+      this.update();
   },
   onMouseClick: function magnifier_onMouseClick(e) {
     if (e.screenX >= this.zoomScope.boxObject.x -8 &&
@@ -789,6 +794,7 @@ Magnifier.prototype = {
     this.dragStart.origHeight = this.position.height;
     this.dragStart.width = this.panel.boxObject.width;
     this.dragStart.height = this.panel.boxObject.height;
+    this.dragStart.wasRendering = this.isRendering;
     this.dragMouseDown = true;
     this.stopRenderingLoop();
   },
@@ -815,10 +821,11 @@ Magnifier.prototype = {
       return;
     this.dragMouseDown = false;
     let self = this;
-    this.chromeWin.setTimeout(function() {
-      self.stopRenderingLoop();
-      self.startRenderingLoop();
-    }, 100);
+    if (this.dragStart.wasRendering)
+      this.chromeWin.setTimeout(function() {
+        self.stopRenderingLoop();
+        self.startRenderingLoop();
+      }, 100);
     this.dragStart = {
       x: -1,
       y: -1,
