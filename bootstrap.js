@@ -722,8 +722,10 @@ Magnifier.prototype = {
   onMouseScrolled: function magnifier_onMouseScrolled(e) {
     let change = e.detail > 0 ? 1: -1;
     this.zoomLevel = Math.min(Math.max(this.zoomLevel - change, 2), 16);
-    let gWidth = Math.floor(this.position.width / this.zoomLevel) + 1;
-    let gHeight = Math.floor(this.position.height / this.zoomLevel) + 1;
+    let gWidth = Math.floor((this.docked?this.position.dockedWidth:
+                                         this.position.width) / this.zoomLevel) + 1;
+    let gHeight = Math.floor((this.docked?this.position.dockedHeight:
+                                          this.position.height) / this.zoomLevel) + 1;
     this.zoomWindow.x -= (gWidth - this.zoomWindow.width) / 2;
     this.zoomWindow.y -= (gHeight - this.zoomWindow.height) / 2;
     this.zoomWindow.width = gWidth;
@@ -739,8 +741,10 @@ Magnifier.prototype = {
       this.zoomLevel = 2 + Math.floor((e.screenX + 10 - this.zoomScope.boxObject.x)/(100/14));
     } catch (ex) {return;}
     this.zoomLevel = Math.min(Math.max(this.zoomLevel, 2), 16);
-    let gWidth = Math.floor(this.position.width / this.zoomLevel) + 1;
-    let gHeight = Math.floor(this.position.height / this.zoomLevel) + 1;
+    let gWidth = Math.floor((this.docked?this.position.dockedWidth:
+                                         this.position.width) / this.zoomLevel) + 1;
+    let gHeight = Math.floor((this.docked?this.position.dockedHeight:
+                                          this.position.height) / this.zoomLevel) + 1;
     this.zoomWindow.x -= Math.floor((gWidth - this.zoomWindow.width) / 2);
     this.zoomWindow.y -= Math.floor((gHeight - this.zoomWindow.height) / 2);
     this.zoomWindow.width = gWidth;
@@ -786,6 +790,8 @@ Magnifier.prototype = {
       return;
     this.panelDragOffset.x = screenX - this.panel.boxObject.x;
     this.panelDragOffset.y = screenY - this.panel.boxObject.y;
+    this.panelDragOffset.wasRendering = this.isRendering;
+    this.panelDragOffset.mouseMoved = false;
     this.panelDragMouseDown = true;
   },
   panelDrag: function magnifier_panelDrag(e) {
@@ -794,21 +800,181 @@ Magnifier.prototype = {
       return;
     }
     e.preventDefault();
+    this.panelDragOffset.mouseMoved = true;
     let x = e.screenX, y = e.screenY;
     if (this.panelDragOffset.x != null)
       x -= this.panelDragOffset.x;
     if (this.panelDragOffset.y != null)
       y -= this.panelDragOffset.y;
-    this.panel.moveTo(x, y);
+    let screenWidth = this.chromeWin.screen.width,
+        screenHeight = this.chromeWin.screen.height;
+    if (this.docked) {
+      if (e.screenX > 0.1*screenWidth &&
+          e.screenX < 0.9*screenWidth &&
+          e.screenY > 0.1*screenHeight &&
+          e.screenY < 0.9*screenHeight)
+        this.docked = this.dockPanel("");
+      if (!this.docked && (e.screenX < this.panel.boxObject.x ||
+          e.screenX > this.panel.boxObject.x + this.panel.boxObject.width)) {
+        x = e.screenX - this.panel.boxObject.width / 2;
+        this.panelDragOffset.x = this.panel.boxObject.width / 2;
+      }
+      else if (!this.docked && (e.screenY < this.panel.boxObject.y ||
+          e.screenY > this.panel.boxObject.y + this.panel.boxObject.height)) {
+        y = e.screenY - this.panel.boxObject.height / 2;
+        this.panelDragOffset.y = this.panel.boxObject.height / 2;
+      }
+    }
+    else {
+      let indicationPlace = "";
+      if (e.screenX < 0.05*screenWidth)
+        indicationPlace = "left";
+      else if (e.screenX > 0.95*screenWidth)
+        indicationPlace = "right";
+      else if (e.screenY < 0.05*screenHeight)
+        indicationPlace = "top";
+      else if (e.screenY > 0.95*screenHeight)
+        indicationPlace = "bottom";
+      if (indicationPlace != "")
+        this.showIndicatoryPanel(indicationPlace);
+      else if (this.iPanel && this.iPanel.state == "open")
+        this.iPanel.hidePopup();
+    }
+    if (!this.docked)
+      this.panel.moveTo(x, y);
   },
   panelDragEnd: function magnifier_panelDragEnd(e) {
-    if (!this.panelDragMouseDown || this.dragMouseDown) {
+    if (!this.panelDragMouseDown || this.dragMouseDown || !this.panelDragOffset.mouseMoved) {
       this.panelDragMouseDown = false;
       return;
     }
+    let screenWidth = this.chromeWin.screen.width,
+        screenHeight = this.chromeWin.screen.height;
+    let dockTo = "";
+    if (e.screenX < 0.05*screenWidth)
+      dockTo = "left";
+    else if (e.screenX > 0.95*screenWidth)
+      dockTo = "right";
+    else if (e.screenY < 0.05*screenHeight)
+      dockTo = "top";
+    else if (e.screenY > 0.95*screenHeight)
+      dockTo = "bottom";
+    if (dockTo != "")
+      this.docked = this.dockPanel(dockTo);
+    if (this.panelDragOffset.wasRendering) {
+      let self = this;
+      this.chromeWin.setTimeout(function() {
+        self.stopRenderingLoop();
+        self.startRenderingLoop();
+      }, 100);
+    }
     this.panelDragMouseDown = false;
   },
+  dockPanel: function magnifier_dockPanel(aDockTo) {
+    let width = this.chromeWin.screen.width,
+        height = this.chromeWin.screen.height;
+    if (this.iPanel && this.iPanel.state == "open")
+      this.iPanel.hidePopup();
+    switch(aDockTo) {
+      case "top":
+        this.position.dockedWidth = width - 40;
+        this.position.dockedHeight = 250;
+        this.zoomWindow.width = Math.floor((width - 40) / this.zoomLevel) + 1;
+        this.zoomWindow.height = Math.floor(250 / this.zoomLevel) + 1;
+        this.setupZoom();
+        this.panel.moveTo(0, 0);
+        this.panel.setAttribute("orient", "horizontal");
+        break;
+      case "bottom":
+        this.position.dockedWidth = width - 40;
+        this.position.dockedHeight = 250;
+        this.zoomWindow.width = Math.floor((width - 40) / this.zoomLevel) + 1;
+        this.zoomWindow.height = Math.floor(250 / this.zoomLevel) + 1;
+        this.setupZoom();
+        this.panel.moveTo(0, height - 340);
+        this.panel.setAttribute("orient", "horizontal");
+        break;
+      case "left":
+        this.position.dockedWidth = 300;
+        this.position.dockedHeight = height - 40;
+        this.zoomWindow.height = Math.floor((height - 40) / this.zoomLevel) + 1;
+        this.zoomWindow.width = Math.floor(300 / this.zoomLevel) + 1;
+        this.setupZoom();
+        this.panel.moveTo(0, 0);
+        this.panel.setAttribute("orient", "vertical");
+        break;
+      case "right":
+        this.position.dockedWidth = 300;
+        this.position.dockedHeight = height - 40;
+        this.zoomWindow.height = Math.floor((height - 40) / this.zoomLevel) + 1;
+        this.zoomWindow.width = Math.floor(300 / this.zoomLevel) + 1;
+        this.setupZoom();
+        this.panel.moveTo(width - 310, 0);
+        this.panel.setAttribute("orient", "vertical");
+        break;
+      default:
+        if (this.docked) {
+          this.zoomWindow.width = Math.floor(this.position.width / this.zoomLevel) + 1;
+          this.zoomWindow.height = Math.floor(this.position.height / this.zoomLevel) + 1;
+          this.panel.setAttribute("orient", "horizontal");
+          this.setupZoom();
+          if (!this.optionsVisible && this.panelDragOffset.optionsVisible)
+            this.toggleOptionPane();
+          if (!this.isRendering)
+            this.update();
+        }
+        return false;
+    }
+    this.panelDragOffset.optionsVisible = this.optionsVisible;
+    if (this.optionsVisible)
+      this.toggleOptionPane();
+    if (!this.isRendering)
+      this.update();
+    return true;
+  },
+  showIndicatoryPanel: function magnifier_showIndicatoryPanel(aWhere) {
+    if (!this.iPanel) {
+      this.iPanel = this.chromeDoc.createElement("panel");
+      this.iPanel.id = "devtools-magnifier-indication-panel";
+      this.iPanel.setAttribute("noautofocus", true);
+      this.iPanel.setAttribute("noautohide", true);
+      this.iPanel.setAttribute("level", "floating");
+      this.iPanel.setAttribute("style", "-moz-appearance: none;background:rgba(0,100,150,0.1);" +
+                                        "border:3px solid #36a;border-radius:5px;");
+      this.chromeDoc.querySelector("#mainPopupSet").appendChild(this.iPanel);
+    }
+    let x = 0, y = 0, width = 0, height = 0,
+        screenWidth = this.chromeWin.screen.width,
+        screenHeight = this.chromeWin.screen.height;
+    switch (aWhere) {
+      case "left":
+        width = 300;
+        height = screenHeight;
+        break;
+      case "right":
+        width = 300;
+        height = screenHeight;
+        x = screenWidth - 304;
+        break;
+      case "top":
+        width = screenWidth;
+        height = 300;
+        break;
+      case "bottom":
+        width = screenWidth;
+        height = 300;
+        y = screenHeight - 310;
+        break;
+    }
+    if (this.iPanel.state == "open")
+      this.iPanel.moveTo(x, y);
+    else
+      this.iPanel.openPopupAtScreen(x, y);
+    this.iPanel.sizeTo(width, height);
+  },
   resizeDragStart: function magnifier_resizeDragStart(e) {
+    if (this.docked)
+      return;
     this.dragStart.x = e.screenX;
     this.dragStart.y = e.screenY;
     this.dragStart.origWidth = this.position.width;
