@@ -88,6 +88,11 @@ function Magnifier(aWindow) {
   this.isOpen = false;
   this.optionsVisible = false;
   this.colorFormat = "RGB";
+  this.os = {
+    linux: this.chromeWin.navigator.oscpu.search(/linux/i) > -1,
+    mac: this.chromeWin.navigator.oscpu.search(/mac/i) > -1,
+    windows: this.chromeWin.navigator.oscpu.search(/windows/i) > -1,
+  };
 
   this._init();
 }
@@ -302,20 +307,22 @@ Magnifier.prototype = {
         this.colorbox.setAttribute("style", "width: 32px; border: 1px solid #333;border-radius: 1px !important;");
         // Color Name
         this.colortext = this.chromeDoc.createElement("textbox");
-        this.colortext.setAttribute("style", "border: solid #333;color:#eee;" +
+        this.colortext.setAttribute("style", "border: solid #333;color:#eee;font-size:12px !important;" +
           "border-radius: 2px 0px 0px 2px !important; border-width: 1px 0px 1px 1px;" +
-          "background-position:4% center; width:120px; height: 24px; margin: 0px 0px 0px 3px;" +
+          "background-position:4% center; width:130px; height: 24px; margin: 0px 0px 0px 3px;" +
           "background-color: transparent;-moz-appearance:none !important;background-image:" +
           "url("+ICON_CLOSE+"),-moz-linear-gradient(hsla(210,16%,76%,.15), hsla(210,16%,76%,.35));" +
           "background-repeat: no-repeat;padding-top:0;padding-bottom:0;-moz-padding-start:18px;" +
           "-moz-padding-end: 12px;box-shadow: inset 0 1px 0 hsla(211,68%,6%,.05), 0 0 0 1px hsla(210,40%,83%,.1);");
+        if (this.os.linux)
+          this.colortext.style.width = "150px";
         this.colorFormatList = this.chromeDoc.createElement("menulist");
         this.colorFormatList.setAttribute("style", "margin: 0px;vertical-align: middle;" +
           "border-radius: 0px 2px 2px 0px !important; -moz-appearance: none;text-align:center;" +
-          "height: 24px; width: 50px; border: 1px solid #333; color: hsl(210,30%,85%);" +
+          "height: 24px; width: 60px; border: 1px solid #333; color: hsl(210,30%,85%);font-size:12px !important;" +
           "background:-moz-linear-gradient(top, rgba(125,125,125,0.25) 0%, rgba(14,14,14,0.25) 100%) !important");
         let (menupop = this.chromeDoc.createElement("menupopup")) {
-          menupop.setAttribute("style", "border: 1px solid #333; color: #eee; background: rgb(125,125,125)");
+          menupop.setAttribute("style", "border: 1px solid #333; color: #eee; background: rgb(125,125,125);font-size:12px !important");
           ["RGB", "HSL", "Hex"].forEach(function(label) {
             let item = this.chromeDoc.createElement("menuitem");
             item.setAttribute("label", label);
@@ -488,7 +495,7 @@ Magnifier.prototype = {
     this.chromeDoc.getElementById("menuWebDeveloperPopup").
       insertBefore(menuitem, this.chromeDoc.getElementById("webConsole"));
 
-    if (this.chromeWin.navigator.oscpu.search(/^mac/i) == -1) {
+    if (!this.os.mac) {
       let appMenu = this.chromeDoc.getElementById("appmenu_webDeveloper_popup");
       if (appMenu) {
         let appMenuItem = this.chromeDoc.createElementNS(XUL, "menuitem");
@@ -543,10 +550,10 @@ Magnifier.prototype = {
     let win = this.state > 0? this.chromeWin:
                               this.tabbrowser.selectedBrowser.contentWindow;
     if (win) { // Why do I need to do that?
-      let x = this.zoomWindow.x + 1, y = this.zoomWindow.y + 1;
+      let x = this.zoomWindow.x + 1, y = this.zoomWindow.y;
       if (this.state > 0) { // Some wierd adjustments
-        x -= win.screenX + 8;
-        y -= win.screenY;
+        x -= win.screenX + (this.os.windows?8:0);
+        y -= win.screenY + (this.os.windows?0:26);
       }
       else {
         x += win.scrollX;
@@ -561,9 +568,12 @@ Magnifier.prototype = {
   changeColorFormat: function magnifier_changeColorFormat() {
     let self = this;
     this.colorFormatList.blur();
+    let wasRendering = this.isRendering;
     this.chromeWin.setTimeout(function() {
       self.colorFormat = self.colorFormatList.getItemAtIndex(self.colorFormatList.selectedIndex).label;
       self.updateColor();
+      if (wasRendering)
+        self.startRenderingLoop();
     }, 50);
   },
   updateColor: function magnifier_updateColor() {
@@ -703,8 +713,10 @@ Magnifier.prototype = {
     this.zoomWindow.x = (this.state > 0? e.screenX: e.clientX) - this.zoomWindow.width / 2;
     this.zoomWindow.y = (this.state > 0? e.screenY: e.clientY) - this.zoomWindow.height / 2;
     if (this.state == 2 && this.isRendering) {
-      this.panel.moveTo(e.screenX - this.position.width / 2 - this.zoomLevel / 2 - 15,
-                        e.screenY - this.position.height / 2 - this.zoomLevel / 2 - 50);
+      this.panel.moveTo(e.screenX - this.position.width / 2 - this.zoomLevel / 2 -
+                        (this.canvasBox.boxObject.x - this.panel.boxObject.x),
+                        e.screenY - this.position.height / 2 - this.zoomLevel / 2 -
+                        (this.canvasBox.boxObject.y - this.panel.boxObject.y));
     }
   },
   onMouseScrolled: function magnifier_onMouseScrolled(e) {
@@ -736,21 +748,25 @@ Magnifier.prototype = {
       this.update();
   },
   onMouseClick: function magnifier_onMouseClick(e) {
-    if (e.screenX >= this.zoomScope.boxObject.x -8 &&
-        e.screenX <= this.zoomScope.boxObject.x + this.zoomScope.boxObject.width + 8 &&
-        e.screenY >= this.zoomScope.boxObject.y &&
-        e.screenY <= this.zoomScope.boxObject.y + this.zoomScope.boxObject.height) {
+    if (this.colorFormatList.firstChild.state == "open" ||
+        this.colorFormatList.firstChild.state == "hiding")
+      return;
+    let screenY = e.screenY + (this.os.windows?8:-55), screenX = e.screenX;
+    if (screenX >= this.zoomScope.boxObject.x -8 &&
+        screenX <= this.zoomScope.boxObject.x + this.zoomScope.boxObject.width + 8 &&
+        screenY >= this.zoomScope.boxObject.y &&
+        screenY <= this.zoomScope.boxObject.y + this.zoomScope.boxObject.height) {
       this.onZoomClick({screenX: e.screenX});
       return;
     }
-    else if (this.state > 0 && !(e.screenX >= this.canvasBox.boxObject.x &&
-             e.screenX <= this.canvasBox.boxObject.x + this.canvasBox.boxObject.width &&
-             e.screenY >= this.canvasBox.boxObject.y &&
-             e.screenY <= this.canvasBox.boxObject.y + this.canvasBox.boxObject.height) &&
-             (e.screenX >= this.panel.boxObject.x &&
-             e.screenX <= this.panel.boxObject.x + this.panel.boxObject.width &&
-             e.screenY >= this.panel.boxObject.y &&
-             e.screenY <= this.panel.boxObject.y + this.panel.boxObject.height))
+    if (this.state > 0 && !(screenX >= this.canvasBox.boxObject.x &&
+        screenX <= this.canvasBox.boxObject.x + this.canvasBox.boxObject.width &&
+        screenY >= this.canvasBox.boxObject.y &&
+        screenY <= this.canvasBox.boxObject.y + this.canvasBox.boxObject.height) &&
+        (screenX >= this.panel.boxObject.x &&
+        screenX <= this.panel.boxObject.x + this.panel.boxObject.width &&
+        screenY >= this.panel.boxObject.y &&
+        screenY <= this.panel.boxObject.y + this.panel.boxObject.height))
       return;
     if (!this.isRendering) return;
     this.stopRenderingLoop();
@@ -758,13 +774,14 @@ Magnifier.prototype = {
     e.stopPropagation();
   },
   panelDragStart: function magnifier_panelDragStart(e) {
-    if (!this.optionsVisible && e.screenX >= this.secondPane.boxObject.x &&
-        e.screenX <= this.secondPane.boxObject.x + this.secondPane.boxObject.width &&
-        e.screenY >= this.secondPane.boxObject.y &&
-        e.screenY <= this.secondPane.boxObject.y + this.secondPane.boxObject.height)
+    let screenY = e.screenY + (this.os.windows?8:-55), screenX = e.screenX;
+    if (!this.optionsVisible && screenX >= this.secondPane.boxObject.x &&
+        screenX <= this.secondPane.boxObject.x + this.secondPane.boxObject.width &&
+        screenY >= this.secondPane.boxObject.y &&
+        screenY <= this.secondPane.boxObject.y + this.secondPane.boxObject.height)
       return;
-    this.panelDragOffset.x = e.screenX - this.panel.boxObject.x;
-    this.panelDragOffset.y = e.screenY - this.panel.boxObject.y;
+    this.panelDragOffset.x = screenX - this.panel.boxObject.x;
+    this.panelDragOffset.y = screenY - this.panel.boxObject.y;
     this.panelDragMouseDown = true;
   },
   panelDrag: function magnifier_panelDrag(e) {
@@ -815,6 +832,8 @@ Magnifier.prototype = {
     }
     this.setupZoom();
     this.update();
+    if (!this.os.windows && (width < this.position.width || height < this.position.height))
+      this.panel.sizeTo(width + 175, height);
   },
   resizeDragEnd: function magnifier_resizeDragEnd(e) {
     if (!this.dragMouseDown)
