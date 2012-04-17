@@ -702,6 +702,8 @@ Magnifier.prototype = {
       this.secondPane.style.opacity = 0;
       this.secondPane.style.margin = "0px -167px 0px 0px";
     }
+    if (!this.os.windows)
+      this.panel.sizeTo(this.position.width + (this.optionsVisible?175:20), this.position + 50);
   },
   onTabSelect: function magnifier_onTabSelect(e) {
     if (this.isOpen && this.state == 0)
@@ -917,6 +919,9 @@ Magnifier.prototype = {
           this.zoomWindow.width = Math.floor(this.position.width / this.zoomLevel) + 1;
           this.zoomWindow.height = Math.floor(this.position.height / this.zoomLevel) + 1;
           this.panel.setAttribute("orient", "horizontal");
+          if (!this.os.windows)
+            this.panel.sizeTo(this.position.width + (this.panelDragOffset.optionsVisible?175:20),
+                              this.position.height + 50);
           this.setupZoom();
           if (!this.optionsVisible && this.panelDragOffset.optionsVisible)
             this.toggleOptionPane();
@@ -925,6 +930,8 @@ Magnifier.prototype = {
         }
         return false;
     }
+    if (!this.os.windows)
+      this.panel.sizeTo(this.position.dockedWidth + 40, this.position.dockedHeight + 40);
     this.panelDragOffset.optionsVisible = this.optionsVisible;
     if (this.optionsVisible)
       this.toggleOptionPane();
@@ -939,8 +946,14 @@ Magnifier.prototype = {
       this.iPanel.setAttribute("noautofocus", true);
       this.iPanel.setAttribute("noautohide", true);
       this.iPanel.setAttribute("level", "floating");
-      this.iPanel.setAttribute("style", "-moz-appearance: none;background:rgba(0,100,150,0.1);" +
+      this.iPanel.setAttribute("style", "-moz-appearance: none !important;background:rgba(0,100,150,0.1);" +
                                         "border:3px solid #36a;border-radius:5px;");
+      if (!this.os.windows) {
+        let label = this.chromeDoc.createElement("label");
+        label.setAttribute("value", "Dock here");
+        this.iPanel.appendChild(label);
+        this.iPanel.style.background = "white";
+      }
       this.chromeDoc.querySelector("#mainPopupSet").appendChild(this.iPanel);
     }
     let x = 0, y = 0, width = 0, height = 0,
@@ -950,21 +963,33 @@ Magnifier.prototype = {
       case "left":
         width = 300;
         height = screenHeight;
+        if (!this.os.windows)
+          y = screenHeight/2 - 50;
         break;
       case "right":
         width = 300;
         height = screenHeight;
-        x = screenWidth - 304;
+        x = screenWidth - (this.os.windows?304:100);
+        if (!this.os.windows)
+          y = screenHeight/2 - 50;
         break;
       case "top":
         width = screenWidth;
         height = 300;
+        if (!this.os.windows)
+          x = screenWidth/2 - 50;
         break;
       case "bottom":
         width = screenWidth;
         height = 300;
-        y = screenHeight - 310;
+        y = screenHeight - (this.os.windows?310:50);
+        if (!this.os.windows)
+          x = screenWidth/2 - 50;
         break;
+    }
+    if (!this.os.windows) {
+      width = 100;
+      height = 50;
     }
     if (this.iPanel.state == "open")
       this.iPanel.moveTo(x, y);
@@ -1002,8 +1027,8 @@ Magnifier.prototype = {
     }
     this.setupZoom();
     this.update();
-    if (!this.os.windows && (width < this.position.width || height < this.position.height))
-      this.panel.sizeTo(width + 175, height);
+    if (!this.os.windows)
+      this.panel.sizeTo(width, height);
   },
   resizeDragEnd: function magnifier_resizeDragEnd(e) {
     if (!this.dragMouseDown)
