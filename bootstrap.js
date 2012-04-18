@@ -34,6 +34,9 @@ const ICON_OPEN = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAA
 const ICON_CLOSE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAACMUlEQVR42o2RT2iSYRzHDWNSbSClJ4960cCLqChNp6GGaCtFUEMwExEUVFCUqUQnoVQEtdFhMAJvSl0SQ9SzXvyHmmyKf/BQqy47jA306fe8MEnqsB+8PC8vfN7f9/l8SaR/h6zX67mRSORjMplcHB4e/kwkEoNoNPrB7Xbv8Xi8u/9hSLfEYjHTZDK9jcfj56lUCmWzWZROpxHAlwcHByWr1boHc3uDEolE9zUazetAIPC9UCgsW60WarfbqNlsolqthjKZzNJut5fkcjlzYxuAYpvNVj0+Pr6q1+uo0+mgXq+Hut0uAZdKJeTz+S4VCoVzTbFYLIpEIjH7/f7TYrG4wtBwOEQnJyfE2e/3UaPRQLFYDAGY+zvmHQBtIGVSrVbRYDBAo9EIjcdj4sQ/wLHxvZVK5ZcNm0KhcB82fqtUKiu8ZTKZoOl0SpwYxpHBLpLJZMkNObu7uxy1Wl04Ojq6wNFmsxlaLBZoPp8Tm0HQ0ul0nkulUtka4nK590C3DKJ+CoVCv3O53AWIWeFtEHMF0FUwGPwB94vTaLQdAuJwONtms3nf4XB8hSrOPB7PZ51OV4AOh/l8fgqWT8PhcE2r1b4BFyzcAJbCgMK1FoulDMWesdnsMp/Pf6xSqR4ajcbn0NsrqOiFwWB4JBAIHhAQHq/X+87lctXA6C8Gg1Emk8nP4PP2tTBsGxJtrYHrgYjvATqn0+k1CoXyFD7tkG4yUDyTSqW+hNcn8GyRbjh/APE8KJeiYd95AAAAAElFTkSuQmCC";
 const ICON_RIGHT_ARROW = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAQCAYAAADAvYV+AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAALBJREFUeNqUkCsOAjEQhltRhwLNFZAIPAdBYzgSAoPiGFwAC0cgoQn03WGm2d0syfbBn3wjmi/t/GUAsERuyAxhJVgnU17IqlWmeGTXKvc5/iPDVA8a8xgjZEg92DgFmUg9yOM0QgjA6jkl2XvfIp9ZLxfAh8N+WMM5l7v5jWyFENdBttZOyXeU1pzz588pyWPwpUt2c2MMdESt9aFYEwVAPphN9U+UUg8p5aLmfQUYAGDUZxKAAai7AAAAAElFTkSuQmCC";
 const ICON_LEFT_ARROW = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAQCAYAAADAvYV+AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAMxJREFUeNqUkbEOgjAQhnukZZE44Mykmwm7Pokru4OPZOILuPsCxsHJ2c3VRIYCQXr+NcFEBIp/8uWul//umlYws3AQgAuIPNGvGNzA3B76zAk4g/Gn0rF6y7+KZGNaAI712k6hMzbGPAC3AYW1MUHh2WW0vI1VVe0Au7BeialKDJQnpVwR0Rq5cZmpTsqyXCAcwKjNqJQiarxIiKYT0mnT7Ps+ff0grnNHcYa4F/8oz/NNURQGsMXZoLVeokkDHrQhTdNJlmVXm78EGACX3OmuRm5+1QAAAABJRU5ErkJggg==";
+const ICON_ZOOM_LOCK = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAABX0lEQVR42uXTQUvCYBgHcA+dunXt2r3P0hfw4s0PIHgzb0KaSuJJtAZraydBtvU2l7BmIYTStYRWm8LaZHueT9D7kAp1aNkteuEP7/7w/rY98KZSf2blcrm9SqUC130DTNOAUumo/SuoVjtu27YFw+ENjEa3HOu/tFqtg42QQqGwpWlq72EywUbjZFCv13rj8X2kXMi4EZTP53cGAwMZY5jNZvepk+Vz/862cdMv2pYkcdzpnD5mMpld6srlsi8Iws+hYvEQut1urGkaMKaCYVzFFMYugf8uqqoe85dAIiQIZxCGAYahzxPifD5Hz3vFVef7Pk6nT8mQKIpAACUIAmw2m2hZVpr2H90bOs5zMiTLMiwWC6TQQT4b1HU9TXvqCPQ8LxlSFGUNUarVKpqmuYaWWDLEBw1RFOEqruvSXBwC6HmJJUOSJH2Cvoag2WyWDPFrgN9BcRzzYTuY+j/rHVFWYsbFFscIAAAAAElFTkSuQmCC";
+const ICON_ZOOM_UNLOCK = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAACrUlEQVR42p2SS0sbURTHQ7uppaWFQkUIQmu7sfQDtNBK6cJVl36PWkqXShcFV0Kp0IWiUDSIC2G0ic1zJpOncTKTZMYkM3ecVzRxDKktEx9onNt7xWmliS144A/3nHP5cf7nXpfrLBYWFh4Hg4FAPE43k8m4jZVIxFo0Ha35/StTs7Ozbtf/Ynx8vMvn+xrKZFIwlYrvxWJReXmZYCkqLKC8sbqaghQVqRKEp/tCyNLS0qNA4FuIYdbscDjETk5Odo+Ojl5x+jMzM9e83uWPqA+TycT+xMTEnY6gWIz25/IcJMkISxDETVyjabqH49gVhmF6cT40NHQ1EPCNoHs2SYY/dAShZjOXZ/c8nj9j8zzTxwt5KAhC/7kd3lhj1iwmmzkaGxu71QYqltZtLsfJ2A6aoIcHfJ9QFl4US0VYAqVBnKfT6dNFRyKRL7ju9Xuft4FESbTDkTCLz2WxvCIBCf4tEYhZ3J+bm3uDcwDAQBsIbIAWV+AEfEZWeoEO+oEKBmVVhpIuvcJ5WSvfO9vdO1wvFArtIFGWarIi76IddDk1wzD6NEODuq7/3hG2nsvnFEVX4PT09MM2EMuxU8ZWBdKp+Cf8OqdTAuA2KkYWge4796LR6FOjWjlm2Gy246v5fD438l3d2q7BdCYzgl/nfB9Pkkgknmxo6knV3IZlSdSIUKjzx1xcXLyrbxr7O9/rtrapW2w+99kzP/86GAy+FYFUMBs7x0jQkaKpyvDwcFdHGPrBt/l1/r2xtXnY+LkLHdV3G5AvCllFV7XzdWSzdCHszMp1iqKeWZY1oKrqALL6ANexnUqtqvxoWtARzkMX2fxX4AlqO2bJOtyHjhBMI0nSfSmY2agrByfH0BGC6a7LBLZj1uvakW1DLGSz5bpsYDvbpqlZzWZLFMWXvwC0ux/tCjQdNQAAAABJRU5ErkJggg%3D%3D";
+const ICON_CROSS = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABGklEQVR42p2SPYqEQBCFh4WFYS6x8eIdBryM6RzBk4hGMrmJgRgpGImIiSD+BIIg/qRKS22VrOy60z2y86DR7urv+bra0+mfquv6IiwCwAcOSVSfpknC+q3v+6sI3iQJ4FXDMNzLsvwUwQ8mv+FNRVHcVFV9Wzfg5IxrC8+EB+d5zhRFed9F/DZhcKAsy5iu62duk45M0jQVw39MFg68HMKihpGqqgLP86SXYBJjDOI4Btu2+SZd1z3ASZKwMAwXrK3zcRzB930wTVN6CtPXCKYz03Bdl9ERSE3TgOM4YBjGjwn+WfI8z+sGemLUXbfp3bIsho0ESoOGoGmavEuB9yu3bQtRFHG7TWsYnXHhTUEQyM+uimpC+FV9Ad0W3CCnrhCfAAAAAElFTkSuQmCC";
 Cu.import("resource://gre/modules/AddonManager.jsm");
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
@@ -331,14 +334,15 @@ Magnifier.prototype = {
           this.colorFormatList.appendChild(menupop);
         }
         listen(this.chromeWin, this.colorFormatList, "command", this.changeColorFormat);
+        // Close button
+        this.closeButton = this.chromeDoc.createElement("toolbarbutton");
+        this.closeButton.className = "chromeclass-toolbar-additional toolbarbutton-1";
+        this.closeButton.setAttribute("style", "list-style-image: url("+ ICON_CROSS +")");
+        this.closeButton.onclick = this.onButtonClick;
         // Start/Stop Rendering button
-        let XHTML = "http://www.w3.org/1999/xhtml";
-        this.resetButton = this.chromeDoc.createElementNS(XHTML, "div");
-        this.resetButton.innerHTML = "Restart Drawing";
-        this.resetButton.setAttribute("style", "text-decoration: none; margin: 2px;" +
-          "padding: 3px; cursor: pointer;color:#eee");
-        if (this.isRendering)
-          this.resetButton.innerHTML = "Lock Zoom";
+        this.resetButton = this.chromeDoc.createElement("toolbarbutton");
+        this.resetButton.className = "chromeclass-toolbar-additional toolbarbutton-1";
+        this.resetButton.setAttribute("style", "list-style-image: url("+ ICON_ZOOM_LOCK +")");
         this.resetButton.onclick = this.toggleRendering;
         // Show/Hide Options button
         this.toggleOptions = this.chromeDoc.createElement("toolbarbutton");
@@ -349,12 +353,13 @@ Magnifier.prototype = {
         colorInfoBox.appendChild(this.colorbox);
         colorInfoBox.appendChild(this.colortext);
         colorInfoBox.appendChild(this.colorFormatList);
-        colorInfoBox.appendChild(this.resetButton);
         let (spacer = this.chromeDoc.createElement("spacer")) {
           spacer.setAttribute("flex", "1");
           colorInfoBox.appendChild(spacer);
         }
+        colorInfoBox.appendChild(this.resetButton);
         colorInfoBox.appendChild(this.toggleOptions);
+        colorInfoBox.appendChild(this.closeButton);
         firstPane.appendChild(colorInfoBox);
       }
       let (canvasBox = this.chromeDoc.createElement("box")) {
@@ -406,6 +411,7 @@ Magnifier.prototype = {
   },
   updateGridColor: function magnifier_updateGridColor() {
     if (!this.showGridOption.checked) {
+      this.lastGridColor = null;
       this.grid.style.backgroundImage = "-moz-linear-gradient(left, rgba(0,0,0,0) 1px, transparent 1px)," +
                                         "-moz-linear-gradient(top, rgba(0,0,0,0) 1px, transparent 1px)";
       return;
@@ -533,11 +539,9 @@ Magnifier.prototype = {
   /* ---------- Content copy ---------- */
   startRenderingLoop: function() {
     this.isRendering = true;
-    this.resetButton.innerHTML = "Lock Zoom";
     this.update();
   },
   stopRenderingLoop: function() {
-    this.resetButton.innerHTML = "Restart Drawing";
     this.isRendering = false;
   },
   toggleRendering: function magnifier_toggleRendering() {
@@ -545,6 +549,8 @@ Magnifier.prototype = {
       this.stopRenderingLoop();
     else
       this.startRenderingLoop();
+    this.resetButton.setAttribute("style", "list-style-image: url(" +
+      (this.isRendering?ICON_ZOOM_LOCK:ICON_ZOOM_UNLOCK) +")");
   },
   update: function magnifier_update() {
     let win = this.state > 0? this.chromeWin:
