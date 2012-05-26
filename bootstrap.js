@@ -336,18 +336,18 @@ Magnifier.prototype = {
         listen(this.chromeWin, this.colorFormatList, "command", this.changeColorFormat);
         // Close button
         this.closeButton = this.chromeDoc.createElement("toolbarbutton");
-        this.closeButton.className = "chromeclass-toolbar-additional toolbarbutton-1";
-        this.closeButton.setAttribute("style", "list-style-image: url("+ ICON_CROSS +")");
+        this.closeButton.className = "toolbarbutton-1";
+        this.closeButton.setAttribute("style", "background: transparent !important; list-style-image: url("+ ICON_CROSS +")");
         this.closeButton.onclick = this.onButtonClick;
         // Start/Stop Rendering button
         this.resetButton = this.chromeDoc.createElement("toolbarbutton");
-        this.resetButton.className = "chromeclass-toolbar-additional toolbarbutton-1";
-        this.resetButton.setAttribute("style", "list-style-image: url("+ ICON_ZOOM_LOCK +")");
+        this.resetButton.className = "toolbarbutton-1";
+        this.resetButton.setAttribute("style", "background: transparent !important; list-style-image: url("+ ICON_ZOOM_LOCK +")");
         this.resetButton.onclick = this.toggleRendering;
         // Show/Hide Options button
         this.toggleOptions = this.chromeDoc.createElement("toolbarbutton");
-        this.toggleOptions.className = "chromeclass-toolbar-additional toolbarbutton-1";
-        this.toggleOptions.setAttribute("style", "list-style-image: url(" +
+        this.toggleOptions.className = "toolbarbutton-1";
+        this.toggleOptions.setAttribute("style", "background: transparent !important; list-style-image: url(" +
           (this.optionsVisible?ICON_LEFT_ARROW:ICON_RIGHT_ARROW) +")");
         this.toggleOptions.onclick = this.toggleOptionPane;
         colorInfoBox.appendChild(this.colorbox);
@@ -706,10 +706,11 @@ Magnifier.prototype = {
     }
     else {
       this.secondPane.style.opacity = 0;
-      this.secondPane.style.margin = "0px -167px 0px 0px";
+      this.secondPane.style.margin = "0px -" + (this.secondPane.boxObject.width - 5) + "px 0px 0px";
     }
     if (!this.os.windows)
-      this.panel.sizeTo(this.position.width + (this.optionsVisible?175:20), this.position + 50);
+      this.panel.sizeTo(this.secondPane.previousSibling.boxObject.width +
+        (this.optionsVisible? this.secondPane.boxObject.width:0) + 10, this.position + 50);
   },
   onTabSelect: function magnifier_onTabSelect(e) {
     if (this.isOpen && this.state == 0)
@@ -786,6 +787,8 @@ Magnifier.prototype = {
       return;
     if (!this.isRendering) return;
     this.stopRenderingLoop();
+    this.resetButton.setAttribute("style", "list-style-image: url(" +
+      ICON_ZOOM_UNLOCK + ")");
     e.preventDefault();
     e.stopPropagation();
   },
