@@ -5,18 +5,17 @@
     <creator>Girish Sharma</creator>
     <id>Magnifier@girishsharma</id>
     <name>Magnifier</name>
-    <version>0.4</version>
+    <version>0.5</version>
     <bootstrap>true</bootstrap>
     <type>2</type>
     <homepageURL>https://addons.mozilla.org/en-US/firefox/addon/magnifier/</homepageURL>
     <description>A quick restartless magnifier to debug styles and web pages.</description>
-    <optionsType>2</optionsType>
 
     <targetApplication>
       <r:Description>
         <id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</id>
-        <minVersion>4.0</minVersion>
-        <maxVersion>14.0a1</maxVersion>
+        <minVersion>10.0</minVersion>
+        <maxVersion>18.0a1</maxVersion>
       </r:Description>
     </targetApplication>
   </r:Description>
