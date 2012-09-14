@@ -858,39 +858,39 @@ Magnifier.prototype = {
       this.iPanel.hidePopup();
     switch(aDockTo) {
       case "top":
-        this.position.dockedWidth = width - 40;
+        this.position.dockedWidth = width - 25;
         this.position.dockedHeight = 250;
-        this.zoomWindow.width = Math.floor((width - 40) / this.zoomLevel) + 1;
+        this.zoomWindow.width = Math.floor((width - 20) / this.zoomLevel) + 1;
         this.zoomWindow.height = Math.floor(250 / this.zoomLevel) + 1;
         this.setupZoom();
         this.panel.moveTo(0, 0);
         this.panel.setAttribute("orient", "horizontal");
         break;
       case "bottom":
-        this.position.dockedWidth = width - 40;
+        this.position.dockedWidth = width - 25;
         this.position.dockedHeight = 250;
-        this.zoomWindow.width = Math.floor((width - 40) / this.zoomLevel) + 1;
+        this.zoomWindow.width = Math.floor((width - 25) / this.zoomLevel) + 1;
         this.zoomWindow.height = Math.floor(250 / this.zoomLevel) + 1;
         this.setupZoom();
-        this.panel.moveTo(0, height - 340);
+        this.panel.moveTo(0, height - 345);
         this.panel.setAttribute("orient", "horizontal");
         break;
       case "left":
-        this.position.dockedWidth = 300;
-        this.position.dockedHeight = height - 40;
-        this.zoomWindow.height = Math.floor((height - 40) / this.zoomLevel) + 1;
-        this.zoomWindow.width = Math.floor(300 / this.zoomLevel) + 1;
+        this.position.dockedWidth = 475;
+        this.position.dockedHeight = height - 25;
+        this.zoomWindow.height = Math.floor((height - 25) / this.zoomLevel) + 1;
+        this.zoomWindow.width = Math.floor(475 / this.zoomLevel) + 1;
         this.setupZoom();
         this.panel.moveTo(0, 0);
         this.panel.setAttribute("orient", "vertical");
         break;
       case "right":
-        this.position.dockedWidth = 300;
-        this.position.dockedHeight = height - 40;
-        this.zoomWindow.height = Math.floor((height - 40) / this.zoomLevel) + 1;
-        this.zoomWindow.width = Math.floor(300 / this.zoomLevel) + 1;
+        this.position.dockedWidth = 475;
+        this.position.dockedHeight = height - 25;
+        this.zoomWindow.height = Math.floor((height - 25) / this.zoomLevel) + 1;
+        this.zoomWindow.width = Math.floor(475 / this.zoomLevel) + 1;
         this.setupZoom();
-        this.panel.moveTo(width - 310, 0);
+        this.panel.moveTo(width - 485, 0);
         this.panel.setAttribute("orient", "vertical");
         break;
       default:
@@ -898,9 +898,8 @@ Magnifier.prototype = {
           this.zoomWindow.width = Math.floor(this.position.width / this.zoomLevel) + 1;
           this.zoomWindow.height = Math.floor(this.position.height / this.zoomLevel) + 1;
           this.panel.setAttribute("orient", "horizontal");
-          if (!this.os.windows)
-            this.panel.sizeTo(this.position.width + 20,
-                              this.position.height + 50);
+          this.panel.sizeTo(this.position.width + 25,
+                            this.position.height + 80);
           this.setupZoom();
           if (!this.isRendering)
             this.update();
@@ -935,13 +934,13 @@ Magnifier.prototype = {
         screenHeight = this.chromeWin.screen.height;
     switch (aWhere) {
       case "left":
-        width = 300;
+        width = 475;
         height = screenHeight;
         if (!this.os.windows)
           y = screenHeight/2 - 50;
         break;
       case "right":
-        width = 300;
+        width = 475;
         height = screenHeight;
         x = screenWidth - (this.os.windows?304:100);
         if (!this.os.windows)
