@@ -310,6 +310,21 @@ Magnifier.prototype = {
               this.showGrid = !this.showGrid;
             }.bind(this));
             menupop.appendChild(showGridOption);
+            // Make edges crisp option
+            let smoothEdgesOption = this.chromeDoc.createElement("menuitem");
+            smoothEdgesOption.setAttribute("label", "Show smooth edges");
+            smoothEdgesOption.setAttribute("type", "checkbox");
+            smoothEdgesOption.setAttribute("checked", pref("smoothEdges"));
+            this.smoothEdges = pref("smoothEdges");
+            smoothEdgesOption.addEventListener("command", function() {
+              this.smoothEdges = !this.smoothEdges;
+              this.canvas.style.imageRendering = !this.smoothEdges
+                                                 ? "-moz-crisp-edges"
+                                                 : "";
+              this.stopRenderingLoop();
+              this.startRenderingLoop();
+            }.bind(this));
+            menupop.appendChild(smoothEdgesOption);
             menu.appendChild(menupop);
           }
           colorInfoBox.appendChild(menu);
@@ -325,7 +340,9 @@ Magnifier.prototype = {
         // Canvas displaying zoomed screen
         this.canvas = this.chromeDoc.createElementNS(XHTML, "canvas");
         this.ctx = this.canvas.getContext("2d");
-        this.canvas.setAttribute("style", "image-rendering:-moz-crisp-edges;background-color:black");
+        this.canvas.setAttribute("style", (!this.smoothEdges
+                                           ? "image-rendering:-moz-crisp-edges;"
+                                           : "") + "background-color:black");
         canvasBox.appendChild(this.canvas);
         // Grid separating each pixel
         this.grid = this.chromeDoc.createElement("box");
@@ -351,22 +368,21 @@ Magnifier.prototype = {
           zoomSlider.setAttribute("flex", "1");
           let label2 = this.chromeDoc.createElement("label");
           label2.setAttribute("value", "2x");
-          label2.setAttribute("style", "padding: 0px 2px;color:#eee");
+          label2.setAttribute("style", "padding: 0px 2px;color:#eef");
           zoomSlider.appendChild(label2);
           let zoomScope = this.chromeDoc.createElement("box");
           zoomScope.setAttribute("flex", "1");
           zoomScope.setAttribute("style", "min-height: 14px;" +
-            "background-repeat: no-repeat; border: 1px solid black;" +
+            "background-repeat: no-repeat; border-bottom: 1px solid #eef;" +
             "margin: 1px 1px; max-height: 14px");
-          zoomScope.style.backgroundImage = "-moz-linear-gradient(right, #eee 1px, rgba(0,0,0,0) 1px)";
-          zoomScope.style.backgroundSize = ((this.zoomLevel - 2)*
-                                           (zoomScope.boxObject.width/6)) + "% 100%";
+          zoomScope.style.backgroundImage = "-moz-linear-gradient(right, #eef 1px, rgba(0,0,0,0) 1px)";
+          zoomScope.style.backgroundSize = ((this.zoomLevel - 2)*(100/6)) + "% 100%";
           zoomSlider.appendChild(zoomScope);
           this.zoomScope = zoomScope;
           listen(this.chromeWin, this.zoomScope, "click", this.onZoomClick);
           let label8 = this.chromeDoc.createElement("label");
           label8.setAttribute("value", "8x");
-          label8.setAttribute("style", "padding: 0px 2px;color:#eee");
+          label8.setAttribute("style", "padding: 0px 2px;color:#eef");
           zoomSlider.appendChild(label8);
           sizeBox.appendChild(zoomSlider);
         }
@@ -517,19 +533,21 @@ Magnifier.prototype = {
   /* ---------- Content copy ---------- */
   startRenderingLoop: function() {
     this.isRendering = true;
+    this.resetButton.style.MozImageRegion = "rect(0px, 32px, 16px, 16px)";
+    this.resetButton.setAttribute("checked", true);
     this.update();
   },
   stopRenderingLoop: function() {
     this.isRendering = false;
+    this.resetButton.style.MozImageRegion = "rect(0px, 16px, 16px, 0px)";
+    this.resetButton.removeAttribute("checked");
   },
   toggleRendering: function magnifier_toggleRendering() {
     if (this.isRendering) {
       this.stopRenderingLoop();
-      this.resetButton.style.MozImageRegion = "rect(0px, 16px, 16px, 0px)";
     }
     else {
       this.startRenderingLoop();
-      this.resetButton.style.MozImageRegion = "rect(0px, 32px, 16px, 16px)";
     }
   },
   update: function magnifier_update() {
@@ -650,8 +668,6 @@ Magnifier.prototype = {
     this.isOpen = true;
     this.stateList.selectedIndex = this.state;
     this.startRenderingLoop();
-    this.resetButton.setAttribute("checked", true);
-    this.resetButton.style.MozImageRegion = "rect(0px, 32px, 16px, 16px)";
     this.attachPageEvents();
   },
   onPopupHiding: function magnifier_onPopupHiding(e) {
@@ -665,6 +681,7 @@ Magnifier.prototype = {
     pref("zoomLevel", this.zoomLevel);
     pref("docked", this.docked);
     pref("showGrid", this.showGrid);
+    pref("cripEdges", this.smoothEdges);
 
     this.button.setAttribute("style", "list-style-image: url(" + ICON_CLOSE + ")");
     this.isOpen = false;
@@ -747,15 +764,13 @@ Magnifier.prototype = {
       return;
     if (!this.isRendering) return;
     this.stopRenderingLoop();
-    this.resetButton.removeAttribute("checked");
-    this.resetButton.style.MozImageRegion = "rect(0px, 16px, 16px, 0px)";
     e.preventDefault();
     e.stopPropagation();
   },
   panelDragStart: function magnifier_panelDragStart(e) {
     let screenY = e.screenY + (this.os.windows?8:-55), screenX = e.screenX;
-    this.panelDragOffset.x = screenX - this.panel.boxObject.x;
-    this.panelDragOffset.y = screenY - this.panel.boxObject.y;
+    this.panelDragOffset.x = -this.chromeWin.screenX + screenX - this.panel.boxObject.x;
+    this.panelDragOffset.y = -this.chromeWin.screenY + screenY - this.panel.boxObject.y;
     this.panelDragOffset.wasRendering = this.isRendering;
     this.panelDragOffset.mouseMoved = false;
     this.panelDragMouseDown = true;
