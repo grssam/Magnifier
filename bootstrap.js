@@ -860,7 +860,7 @@ Magnifier.prototype = {
       case "top":
         this.position.dockedWidth = width - 25;
         this.position.dockedHeight = 250;
-        this.zoomWindow.width = Math.floor((width - 20) / this.zoomLevel) + 1;
+        this.zoomWindow.width = Math.floor((width - 25) / this.zoomLevel) + 1;
         this.zoomWindow.height = Math.floor(250 / this.zoomLevel) + 1;
         this.setupZoom();
         this.panel.moveTo(0, 0);
@@ -906,8 +906,7 @@ Magnifier.prototype = {
         }
         return false;
     }
-    if (!this.os.windows)
-      this.panel.sizeTo(this.position.dockedWidth + 40, this.position.dockedHeight + 40);
+    this.panel.sizeTo(this.position.dockedWidth + 40, this.position.dockedHeight + 80);
     if (!this.isRendering)
       this.update();
     return true;
