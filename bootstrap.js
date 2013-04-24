@@ -261,7 +261,7 @@ Magnifier.prototype = {
         let stateList = this.chromeDoc.createElement("menulist");
         stateList.setAttribute("class", "devtools-menulist");
         let (menupop = this.chromeDoc.createElement("menupopup")) {
-          ["Content Zoom", "Browser Zoom", "Mouse Zoom"].forEach(function(label) {
+          ["Content Zoom", "Browser Zoom", "Mouse Zoom", "Panel Zoom"].forEach(function(label) {
             let item = this.chromeDoc.createElement("menuitem");
             item.setAttribute("label", label);
             item.setAttribute("style", "text-align: center");
@@ -555,13 +555,19 @@ Magnifier.prototype = {
                               this.tabbrowser.selectedBrowser.contentWindow;
     if (win) { // Why do I need to do that?
       let x = this.zoomWindow.x + 1, y = this.zoomWindow.y;
-      if (this.state > 0) { // Some wierd adjustments
-        x -= win.screenX + (this.os.windows?8:0);
-        y -= win.screenY + (this.os.windows?0:26);
+      if (this.state < 3) {
+        if (this.state > 0) { // Some wierd adjustments
+          x -= win.screenX + (this.os.windows?8:0);
+          y -= win.screenY + (this.os.windows?0:26);
+        }
+        else {
+          x += win.scrollX;
+          y += win.scrollY;
+        }
       }
       else {
-        x += win.scrollX;
-        y += win.scrollY;
+        x = this.canvasBox.boxObject.x + this.canvasBox.boxObject.width * (1 - 1 / (this.zoomLevel||2)) / 2;
+        y = this.canvasBox.boxObject.y + this.canvasBox.boxObject.height * (1 - 1 / (this.zoomLevel||2)) / 2;
       }
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
       this.ctx.drawWindow(win, x, y, this.zoomWindow.width, this.zoomWindow.height, "white");
@@ -601,42 +607,38 @@ Magnifier.prototype = {
     this.updateGridColor();
   },
   RGB2HSL: function magnifier_RGB2HSL({r,g,b}) {
-    let h, s, l, min, max, delta;
-    if (r > g){
-      max = Math.max (r, b);
-      min = Math.min (g, b);
-    } else{
-      max = Math.max (g, b);
-      min = Math.min (r, b);
+    r/=255; g/=255; b/=255;
+    var maxColor = Math.max(r,g,b);
+    var minColor = Math.min(r,g,b);
+    //Calculate L:
+    var L = (maxColor + minColor) / 2 ;
+    var S = 0;
+    var H = 0;
+    if(maxColor != minColor){
+        //Calculate S:
+        if(L < 0.5){
+            S = (maxColor - minColor) / (maxColor + minColor);
+        }else{
+            S = (maxColor - minColor) / (2.0 - maxColor - minColor);
+        }
+        //Calculate H:
+        if(r == maxColor){
+            H = (g-b) / (maxColor - minColor);
+        }else if(g == maxColor){
+            H = 2.0 + (b - r) / (maxColor - minColor);
+        }else{
+            H = 4.0 + (r - g) / (maxColor - minColor);
+        }
     }
-    l = (max + min) / 2.0;
-
-    if (max == min) {
-      s = 0.0;
-      h = 0.0;
-    } else {
-      delta = (max - min);
-      if (l < 128) {
-        s = 255 * delta / (max + min);
-      } else {
-        s = 255 * delta / (511 - max - min);
-      }
-      if (r == max) {
-        h = (g - b) / delta;
-      } else if (g == max) {
-        h = 2 + (b - r) / delta;
-      } else {
-        h = 4 + (r - g) / delta;
-      }
-      h = h * 42.5;
-      if (h < 0){ h += 255; }
-      else if (h > 255){ h -= 255; }
+ 
+    L = Math.round(L * 100);
+    S = Math.round(S * 100);
+    H = Math.round(H * 60);
+    if(H<0){
+        H += 360;
     }
-
-    h = Math.round(h);
-    s = Math.round(s);
-    l = Math.round(l);
-    return {h:h,s:s,l:l};
+    var result = [H, S, L];
+    return {h:H,s:S,l:L};
   },
   RGB2Hex: function magnifier_RGB2Hex({r,g,b}) {
     function hex(x) {
